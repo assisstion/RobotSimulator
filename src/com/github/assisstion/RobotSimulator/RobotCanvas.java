@@ -25,7 +25,7 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 	protected Set<Pair<Integer, Integer>> newPoints = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	protected float leftSpeed = 50f;
+	protected float leftSpeed = 90f;
 	protected float rightSpeed = 100f;
 
 	//protected int speedMultiplier = 100;
