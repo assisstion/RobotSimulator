@@ -43,6 +43,7 @@ public class RobotGUI extends JFrame{
 		//setContentPane(contentPane);
 
 		RobotCanvas rc = new RobotCanvas();
+		addKeyListener(rc);
 		setContentPane(rc);
 		rc.repaint();
 	}
