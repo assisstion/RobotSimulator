@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @param <T> the type of the first value
  * @param <S> the type of the second value
  */
-public class Pair<T, S> implements Serializable{
+public class Pair<T, S> implements Serializable, Comparable<Pair<T, S>>{
 
 	private static final long serialVersionUID = -8076809629855557338L;
 	private static final int LOW_MASK = 0x0000FFFF;
@@ -108,6 +108,11 @@ public class Pair<T, S> implements Serializable{
 	 */
 	public static <T, S> Pair<T, S> make(Pair<T, S> pair){
 		return new Pair<T, S>(pair);
+	}
+
+	@Override
+	public int compareTo(Pair<T, S> o){
+		return new Integer(hashCode()).compareTo(o.hashCode());
 	}
 
 }

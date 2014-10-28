@@ -9,25 +9,26 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.swing.JPanel;
 
 public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListener{
 
 	protected float n = 0.50f;
-	protected Vector2 subPoint = new Vector2(n * 100, 0);
+	protected float multi = 10;
+	protected Vector2 subPoint = new Vector2(n * multi, 0);
 	protected Vector2 currentPoint = new Vector2(300, 300);
 	//In radians; 0 is top, pi/2 is right
 	protected float direction = (float)(Math.PI / 2);
-	protected Set<Pair<Integer, Integer>> newPoints = new HashSet<Pair<Integer, Integer>>();
-	protected Set<Pair<Integer, Integer>> points = new HashSet<Pair<Integer, Integer>>();
+	protected Set<Pair<Integer, Integer>> newPoints = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
+	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	protected float inSpeed = 0.5f;
-	protected float outSpeed = 1f;
+	protected float leftSpeed = 50f;
+	protected float rightSpeed = 100f;
 
-	protected int pixelsPerSecond = 100;
+	//protected int speedMultiplier = 100;
 	protected int updatesPerSecond = 300;
 	protected int updatesPerPaint = 5;
 
@@ -110,12 +111,18 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		g2d.setColor(Color.RED);
 		g2d.fillOval((int) currentPoint.x - 2, (int) currentPoint.y - 2,
 				4, 4);
+		g2d.setColor(Color.GREEN);
+		g2d.fillOval((int) (currentPoint.x - Math.cos(direction) * subPoint.x
+				+ Math.sin(direction) * subPoint.y) - 2, (int)(currentPoint.y
+						- Math.cos(direction) * subPoint.y
+						- Math.sin(direction) * subPoint.x) - 2,
+						4, 4);
 	}
 
 
 	public void updateMotion(){
 		float roc;
-		if(inSpeed == outSpeed){
+		if(leftSpeed == rightSpeed){
 			roc = 0;
 		}
 		else{
@@ -124,7 +131,7 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 			//movement = 0;
 			//}
 			//if(inSpeed < outSpeed){
-			roc = (inSpeed - outSpeed) / n;
+			roc = (leftSpeed - rightSpeed) / n;
 			////roc = 1/ (n / (inSpeed/outSpeed - 1.0f));
 			//}
 			//else{
@@ -135,9 +142,9 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 			//	roc = -n / (outSpeed/inSpeed - 1);
 			//}
 		}
-		direction += roc / updatesPerSecond;
+		direction += roc / updatesPerSecond / multi;
 		//direction += roc / updatesPerSecond * outSpeed;
-		float speed = pixelsPerSecond * outSpeed / updatesPerSecond;
+		float speed = rightSpeed / updatesPerSecond;
 		currentPoint.y += -Math.cos(direction) * speed;
 		currentPoint.x += Math.sin(direction) * speed;
 		newPoints.add(Pair.make((int)currentPoint.x, (int)currentPoint.y));
