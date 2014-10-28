@@ -32,6 +32,7 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 	protected int updatesPerSecond = 300;
 	protected int updatesPerPaint = 5;
 
+	private Object pauseLock = new Object();
 	protected boolean paused;
 	protected boolean enabled;
 
@@ -54,18 +55,22 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		return enabled;
 	}
 
-	public synchronized void setPaused(boolean b){
-		if(paused == b){
-			return;
-		}
-		paused = b;
-		if(!b){
-			notifyAll();
+	public void setPaused(boolean b){
+		synchronized(pauseLock){
+			if(paused == b){
+				return;
+			}
+			paused = b;
+			if(!b){
+				notifyAll();
+			}
 		}
 	}
 
-	public synchronized boolean isPaused(){
-		return paused;
+	public boolean isPaused(){
+		synchronized(pauseLock){
+			return paused;
+		}
 	}
 
 
@@ -100,8 +105,8 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setBackground(Color.WHITE);
 		g2d.clearRect(0, 0, getWidth(), getHeight());
-		g2d.setColor(Color.BLACK);
-		g2d.fillRect(0, 0, 10, 10);
+		//g2d.setColor(Color.BLACK);
+		//g2d.fillRect(0, 0, 10, 10);
 		points.addAll(newPoints);
 		newPoints.clear();
 		for(Pair<Integer, Integer> point : points){
@@ -112,11 +117,12 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		g2d.fillOval((int) currentPoint.x - 2, (int) currentPoint.y - 2,
 				4, 4);
 		g2d.setColor(Color.GREEN);
-		g2d.fillOval((int) (currentPoint.x - Math.cos(direction) * subPoint.x
-				+ Math.sin(direction) * subPoint.y) - 2, (int)(currentPoint.y
-						- Math.cos(direction) * subPoint.y
-						- Math.sin(direction) * subPoint.x) - 2,
-						4, 4);
+		int subX = (int) (currentPoint.x - Math.cos(direction) * subPoint.x
+				+ Math.sin(direction) * subPoint.y);
+		int subY = (int)(currentPoint.y - Math.cos(direction) * subPoint.y
+				- Math.sin(direction) * subPoint.x);
+		g2d.fillOval(subX - 2, subY - 2, 4, 4);
+
 	}
 
 
@@ -161,7 +167,7 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		while(enabled){
 			while(paused){
 				try{
-					synchronized(this){
+					synchronized(pauseLock){
 						wait();
 					}
 				}
@@ -212,7 +218,7 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		if(e.getKeyChar() == 'r'){
 			try{
 				boolean tempPaused;
-				synchronized(this){
+				synchronized(pauseLock){
 					tempPaused = isPaused();
 					setPaused(true);
 				}
@@ -222,7 +228,7 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 				if(doPrint){
 					job.print();
 				}
-				synchronized(this){
+				synchronized(pauseLock){
 					setPaused(tempPaused);
 				}
 			}
