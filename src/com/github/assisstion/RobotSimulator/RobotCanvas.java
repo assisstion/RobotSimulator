@@ -16,15 +16,20 @@ import javax.swing.JPanel;
 
 public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListener{
 
-	protected Vector2 currentPoint = new Vector2(100, 100);
+	protected float n = 0.50f;
+	protected Vector2 subPoint = new Vector2(n * 100, 0);
+	protected Vector2 currentPoint = new Vector2(300, 300);
 	//In radians; 0 is top, pi/2 is right
 	protected float direction = (float)(Math.PI / 2);
 	protected Set<Pair<Integer, Integer>> newPoints = new HashSet<Pair<Integer, Integer>>();
 	protected Set<Pair<Integer, Integer>> points = new HashSet<Pair<Integer, Integer>>();
 
+	protected float inSpeed = 0.5f;
+	protected float outSpeed = 1f;
+
 	protected int pixelsPerSecond = 100;
-	protected int updatesPerSecond = 200;
-	protected int updatesPerPaint = 3;
+	protected int updatesPerSecond = 300;
+	protected int updatesPerPaint = 5;
 
 	protected boolean paused;
 	protected boolean enabled;
@@ -109,11 +114,35 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 
 
 	public void updateMotion(){
-		direction += 1.0 / updatesPerSecond;
-		float speed = (float) pixelsPerSecond / updatesPerSecond;
+		float roc;
+		if(inSpeed == outSpeed){
+			roc = 0;
+		}
+		else{
+			//if(outSpeed == 0){
+			//	roc = 1000000000f;
+			//movement = 0;
+			//}
+			//if(inSpeed < outSpeed){
+			roc = 1/ (n / (inSpeed/outSpeed - 1.0f));
+			//}
+			//else{
+			//	roc = -n / (outSpeed/inSpeed - 1.0f);
+			//}
+			//}
+			//else{
+			//	roc = -n / (outSpeed/inSpeed - 1);
+			//}
+		}
+		direction += roc / updatesPerSecond * outSpeed;
+		float speed = pixelsPerSecond * outSpeed / updatesPerSecond;
 		currentPoint.y += -Math.cos(direction) * speed;
 		currentPoint.x += Math.sin(direction) * speed;
 		newPoints.add(Pair.make((int)currentPoint.x, (int)currentPoint.y));
+		newPoints.add(Pair.make((int)(currentPoint.x - Math.cos(direction) * subPoint.x
+				+ Math.sin(direction) * subPoint.y), (int)(currentPoint.y
+						- Math.cos(direction) * subPoint.y
+						- Math.sin(direction) * subPoint.x)));
 	}
 
 	protected int paintCounter = 0;
