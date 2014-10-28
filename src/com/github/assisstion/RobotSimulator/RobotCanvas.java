@@ -124,7 +124,8 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 			//movement = 0;
 			//}
 			//if(inSpeed < outSpeed){
-			roc = 1/ (n / (inSpeed/outSpeed - 1.0f));
+			roc = (inSpeed - outSpeed) / n;
+			////roc = 1/ (n / (inSpeed/outSpeed - 1.0f));
 			//}
 			//else{
 			//	roc = -n / (outSpeed/inSpeed - 1.0f);
@@ -134,7 +135,8 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 			//	roc = -n / (outSpeed/inSpeed - 1);
 			//}
 		}
-		direction += roc / updatesPerSecond * outSpeed;
+		direction += roc / updatesPerSecond;
+		//direction += roc / updatesPerSecond * outSpeed;
 		float speed = pixelsPerSecond * outSpeed / updatesPerSecond;
 		currentPoint.y += -Math.cos(direction) * speed;
 		currentPoint.x += Math.sin(direction) * speed;
