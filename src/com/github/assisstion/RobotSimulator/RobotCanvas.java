@@ -12,7 +12,7 @@ public class RobotCanvas extends JPanel implements Runnable{
 
 	protected Vector2 currentPoint = new Vector2(100, 100);
 	//In radians; 0 is top, pi/2 is right
-	protected float direction = (float)(Math.PI / 4);
+	protected float direction = (float)(Math.PI / 2);
 	protected Set<Pair<Integer, Integer>> points = new HashSet<Pair<Integer, Integer>>();
 
 	protected int pixelsPerSecond = 100;
@@ -47,7 +47,7 @@ public class RobotCanvas extends JPanel implements Runnable{
 	//protected float counter = 10000;
 
 	public void updateMotion(){
-		direction += 0.01 * 100 / updatesPerSecond;
+		direction += 1.0 / updatesPerSecond;
 		float speed = (float) pixelsPerSecond / updatesPerSecond;
 		currentPoint.y += -Math.cos(direction) * speed;
 		currentPoint.x += Math.sin(direction) * speed;
