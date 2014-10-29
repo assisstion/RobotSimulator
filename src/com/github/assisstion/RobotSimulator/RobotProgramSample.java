@@ -10,14 +10,14 @@ public class RobotProgramSample extends RobotProgram{
 
 	@Override
 	public void run(){
-		// TODO Auto-generated method stub
+		float speed = 100;
 		while(true){
-			motor[motorA] = 500;
-			motor[motorB] = 475;
-			wait1Msec(1257);
-			motor[motorA] = 475;
-			motor[motorB] = 500;
-			wait1Msec(1257);
+			motor[motorA] = speed;
+			motor[motorB] = speed - leftWheel.x * speed / 100;
+			wait1Msec((int)(Math.PI * 200000 / speed));
+			motor[motorA] = speed - leftWheel.x * speed / 100;
+			motor[motorB] = speed;
+			wait1Msec((int)(Math.PI * 200000 / speed));
 			clearPoints();
 		}
 	}

@@ -21,9 +21,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private NavigableMap<Long, Object> frameCounterLocks =
 			new TreeMap<Long, Object>();
 
-	//5.0f
-	protected double wheelDistance = 5.0f;
-	protected Vector2 leftWheel = new Vector2(wheelDistance, 0);
+	//Position relative to the right wheel
+	//(5.0f, 0)
+	protected Vector2 leftWheel = new Vector2(5.0f, 0);
 	//(300, 300)
 	protected Vector2 rightWheel = new Vector2(300, 300);
 	//In radians; 0 is top, pi/2 is right
@@ -31,23 +31,24 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected double direction = Math.PI / 2;
 	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	protected double[] motor = new double[2];
+	public double[] motor = new double[2];
 
-	protected static final int motorA = 0;
-	protected static final int motorB = 1;
+	public static final int motorA = 0;
+	public static final int motorB = 1;
 
 	//protected int speedMultiplier = 100;
-	protected int updatesPerSecond = 1000;
-	protected int updatesPerPaint = 15;
+	private int updatesPerSecond = 1000;
+	private int updatesPerPaint = 15;
 
 	private Object pauseLock = new Object();
 	private boolean paused;
 	private boolean enabled;
 
 	private int paintCounter = 0;
+	//In nanos
 	protected long frameCounter = 0;
-	protected long lastNano = 0;
-	protected long diff = 1000000;
+	private long lastNano = 0;
+	private long diff = 1000000;
 
 	/**
 	 *
@@ -63,7 +64,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double direction
 			, double initialLeftSpeed, double initialRightSpeed ){
-		this.wheelDistance = wheelDistance;
 		rightWheel = new Vector2(rightWheelStart);
 		leftWheel = new Vector2(wheelDistance, 0);
 		this.direction = direction;
@@ -89,7 +89,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 			}
 			paused = b;
 			if(!b){
-				notifyAll();
+				pauseLock.notifyAll();
 			}
 		}
 	}
@@ -142,19 +142,23 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		g2d.fillOval((int) rightWheel.x - 2, (int) rightWheel.y - 2,
 				4, 4);
 		g2d.setColor(Color.GREEN);
-		int subX = (int) (rightWheel.x - Math.cos(direction) * leftWheel.x
-				+ Math.sin(direction) * leftWheel.y);
-		int subY = (int)(rightWheel.y - Math.cos(direction) * leftWheel.y
-				- Math.sin(direction) * leftWheel.x);
-		g2d.fillOval(subX - 2, subY - 2, 4, 4);
-
+		double subX = rightWheel.x - Math.cos(direction) * leftWheel.x
+				+ Math.sin(direction) * leftWheel.y;
+		double subY = rightWheel.y - Math.cos(direction) * leftWheel.y
+				- Math.sin(direction) * leftWheel.x;
+		g2d.fillOval((int) subX - 2, (int) subY - 2, 4, 4);
+		g2d.setColor(Color.BLUE);
+		double centerX = (rightWheel.x + subX) / 2;
+		double centerY = (rightWheel.y + subY) / 2;
+		g2d.fillOval((int)(centerX - leftWheel.x / 2), (int)(centerY - leftWheel.x / 2),
+				(int) leftWheel.x, (int) leftWheel.x);
 	}
 
 
 	//Diff in nanos
 	public void updateMotion(long diff){
 		double a = 1000000000 / diff;
-		double roc = (motor[motorA] - motor[motorB]) / wheelDistance;
+		double roc = (motor[motorA] - motor[motorB]) / leftWheel.x;
 		direction += roc / a;
 		double speed = motor[motorB] / a;
 		rightWheel.y += -Math.cos(direction) * speed;
@@ -171,10 +175,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		public void run(){
 			lastNano = System.nanoTime();
 			while(enabled){
+				long pauseNano = System.nanoTime();
 				while(paused){
 					try{
 						synchronized(pauseLock){
-							wait();
+							pauseLock.wait();
 						}
 					}
 					catch(InterruptedException e){
@@ -182,6 +187,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 						e.printStackTrace();
 					}
 				}
+				long pausedNano = System.nanoTime() - pauseNano;
+				lastNano += pausedNano;
 				try{
 					paintCounter--;
 					if(paintCounter <= 0){
