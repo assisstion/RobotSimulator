@@ -236,7 +236,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		}
 		for(Map.Entry<Shape, Boolean> shapeHolder : shapes.entrySet()){
 			if(!shapeHolder.getValue()){
-				return true;
+				continue;
 			}
 			Shape shape = shapeHolder.getKey();
 			Area ae2dd = new Area(e2dd);

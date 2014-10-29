@@ -1,5 +1,6 @@
 package com.github.assisstion.RobotSimulator;
 
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import com.github.assisstion.RobotSimulator.sensor.TouchSensor;
@@ -16,7 +17,8 @@ public class RobotProgramSample extends RobotProgram{
 
 	public RobotProgramSample(){
 		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true);
-		shapes.put(new Rectangle2D.Double(270, 100, 50, 50), true);
+		shapes.put(new Rectangle2D.Double(268, 100, 50, 50), true);
+		shapes.put(new Ellipse2D.Double(368, 150 - ROBOT_WIDTH / 2, 50, 50), false);
 		sensor = new TouchSensor(this, new Vector2(
 				getLeftWheelRelative().x / 2, a), 0.2 * getLeftWheelRelative().x / 5);
 	}
@@ -35,15 +37,32 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec(500);
 		motor[motorB] = -100;
 		motor[motorC] = -100;
-		wait1Msec(42);
+		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
 		motor[motorB] = 10;
 		motor[motorC] = -10;
 		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4));
 		motor[motorB] = 100;
 		motor[motorC] = 100;
 		wait1Msec(1000);
+		motor[motorA] = 50;
 		motor[motorB] = 0;
 		motor[motorC] = 0;
+		wait1Msec(500);
+		motor[motorA] = -50;
+		wait1Msec(500);
+		motor[motorA] = 0;
+		motor[motorB] = -100;
+		motor[motorC] = -100;
+		wait1Msec(1000);
+		motor[motorB] = -10;
+		motor[motorC] = 10;
+		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4));
+		motor[motorB] = 100;
+		motor[motorC] = 100;
+		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
+		motor[motorB] = 0;
+		motor[motorC] = 0;
+
 
 		/*
 		float speed = 100;
