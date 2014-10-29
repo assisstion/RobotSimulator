@@ -1,5 +1,6 @@
 package com.github.assisstion.RobotSimulator;
 
+import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
@@ -9,6 +10,7 @@ import com.github.assisstion.RobotSimulator.sensor.TouchSensor;
 public class RobotProgramSample extends RobotProgram{
 
 	protected TouchSensor sensor;
+	protected Shape ball;
 
 	public static final float ROBOT_WIDTH = 20.0f;
 
@@ -17,8 +19,9 @@ public class RobotProgramSample extends RobotProgram{
 
 	public RobotProgramSample(){
 		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true);
-		shapes.put(new Rectangle2D.Double(268, 100, 50, 50), true);
-		shapes.put(new Ellipse2D.Double(368, 150 - ROBOT_WIDTH / 2, 50, 50), false);
+		shapes.put(new Rectangle2D.Double(267, 100, 50, 50), true);
+		ball = new Ellipse2D.Double(400, 150, ROBOT_WIDTH, ROBOT_WIDTH);
+		shapes.put(ball, false);
 		sensor = new TouchSensor(this, new Vector2(
 				getLeftWheelRelative().x / 2, a), 0.2 * getLeftWheelRelative().x / 5);
 	}
@@ -48,6 +51,7 @@ public class RobotProgramSample extends RobotProgram{
 		motor[motorB] = 0;
 		motor[motorC] = 0;
 		wait1Msec(500);
+		shapes.remove(ball);
 		motor[motorA] = -50;
 		wait1Msec(500);
 		motor[motorA] = 0;
@@ -62,8 +66,6 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
 		motor[motorB] = 0;
 		motor[motorC] = 0;
-
-
 		/*
 		float speed = 100;
 		while(true){
