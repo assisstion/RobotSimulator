@@ -3,16 +3,23 @@ package com.github.assisstion.RobotSimulator;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Supplier;
 
 import javax.swing.JPanel;
 
@@ -20,6 +27,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	private NavigableMap<Long, Object> frameCounterLocks =
 			new TreeMap<Long, Object>();
+
+	private Map<Object, Supplier<Boolean>> waitLocks = new HashMap<Object,
+			Supplier<Boolean>>();
+
+	protected Set<Shape> shapes = new HashSet<Shape>();
 
 	//Position relative to the right wheel
 	//(5.0f, 0)
@@ -147,10 +159,16 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		double subY = sub.y;
 		g2d.fillOval((int) subX - 2, (int) subY - 2, 4, 4);
 		g2d.setColor(Color.BLUE);
+		/*
 		double centerX = (rightWheel.x + subX) / 2;
 		double centerY = (rightWheel.y + subY) / 2;
 		g2d.fillOval((int)(centerX - leftWheel.x / 2), (int)(centerY - leftWheel.x / 2),
 				(int) leftWheel.x, (int) leftWheel.x);
+		 */
+		g2d.fill(getWheelEllipse());
+		for(Shape shape : shapes){
+			g2d.draw(shape);
+		}
 	}
 
 	public static Vector2 relativeVector(Vector2 orig, Vector2 add, double direction){
@@ -166,11 +184,38 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		double roc = (motor[motorA] - motor[motorB]) / leftWheel.x;
 		direction += roc / a;
 		double speed = motor[motorB] / a;
-		rightWheel.y += -Math.cos(direction) * speed;
-		rightWheel.x += Math.sin(direction) * speed;
+		if(!resolveWheel(speed)){
+			rightWheel.y -= -Math.cos(direction) * speed;
+			rightWheel.x -= Math.sin(direction) * speed;
+			direction -= roc / a;
+		}
 		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
 		points.add(Pair.make((int)rightWheel.x, (int)rightWheel.y));
 		points.add(Pair.make((int)sub.x, (int)sub.y));
+	}
+
+	public boolean resolveWheel(double dist){
+		rightWheel.y += -Math.cos(direction) * dist;
+		rightWheel.x += Math.sin(direction) * dist;
+		Ellipse2D.Double e2dd = getWheelEllipse();
+		for(Shape shape : shapes){
+			Area ae2dd = new Area(e2dd);
+			ae2dd.intersect(new Area(shape));
+			if(!ae2dd.isEmpty()){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public Ellipse2D.Double getWheelEllipse(){
+		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
+		double subX = sub.x;
+		double subY = sub.y;
+		double centerX = (rightWheel.x + subX) / 2;
+		double centerY = (rightWheel.y + subY) / 2;
+		return new Ellipse2D.Double(centerX - leftWheel.x / 2, centerY - leftWheel.x / 2,
+				leftWheel.x, leftWheel.x);
 	}
 
 	protected class RobotCanvasRunner implements Runnable{
@@ -218,6 +263,14 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 					e.printStackTrace();
 				}
 				updateMotion(diff);
+				for(Map.Entry<Object, Supplier<Boolean>> condition : waitLocks.entrySet()){
+					if(condition.getValue().get()){
+						Object lock = condition.getKey();
+						synchronized(lock){
+							lock.notifyAll();
+						}
+					}
+				}
 			}
 		}
 	}
@@ -269,6 +322,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		}
 	}
 
+	public Object getWaitLock(Supplier<Boolean> condition){
+		Object o = new Object();
+		waitLocks.put(o, condition);
+		return o;
+	}
 
 
 	public Object getFrameCounterLock(long target){
@@ -292,5 +350,23 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	public void clearPoints(){
 		points.clear();
+	}
+
+
+
+	public Vector2 getRightWheel(){
+		return rightWheel;
+	}
+
+	public Vector2 getLeftWheel(){
+		return relativeVector(rightWheel, leftWheel, direction);
+	}
+
+	public Vector2 getLeftWheelRelative(){
+		return leftWheel;
+	}
+
+	public double getDirection(){
+		return direction;
 	}
 }

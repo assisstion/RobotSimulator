@@ -1,6 +1,9 @@
 package com.github.assisstion.RobotSimulator;
 
 import java.awt.EventQueue;
+import java.awt.Shape;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.swing.JFrame;
 
@@ -21,8 +24,28 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 	}
 
 	@Override
+	public Set<Shape> getShapes(){
+		return shapes;
+	}
+
+	@Override
 	public double[] getMotors(){
 		return motor;
+	}
+
+	public void waitUntil(Supplier<Boolean> condition){
+		Object o = getWaitLock(condition);
+		while(!condition.get()){
+			synchronized(o){
+				try{
+					o.wait();
+				}
+				catch(InterruptedException e){
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@Override
