@@ -9,13 +9,16 @@ public class RobotProgramSample extends RobotProgram{
 
 	protected TouchSensor sensor;
 
-	public static final float ROBOT_WIDTH = 20.1f;
+	public static final float ROBOT_WIDTH = 20.0f;
+
+	private static int a = 10;
+	private static int b = 10;
 
 	public RobotProgramSample(){
-		super(new Vector2(300, 300), ROBOT_WIDTH, 0, 0, 0);
-		shapes.add(new Rectangle2D.Double(270, 100, 50, 50));
+		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true);
+		shapes.put(new Rectangle2D.Double(270, 100, 50, 50), true);
 		sensor = new TouchSensor(this, new Vector2(
-				getLeftWheelRelative().x / 2, getLeftWheelRelative().x / 2), 0.2 * getLeftWheelRelative().x / 5);
+				getLeftWheelRelative().x / 2, a), 0.2 * getLeftWheelRelative().x / 5);
 	}
 
 	private static final long serialVersionUID = 346397218252074433L;
@@ -30,12 +33,12 @@ public class RobotProgramSample extends RobotProgram{
 		motor[motorC] = 100;
 		waitUntil(() -> SensorValue(sensor) == 1);
 		wait1Msec(500);
-		motor[motorB] = -20;
-		motor[motorC] = -20;
-		wait1Msec(200);
+		motor[motorB] = -100;
+		motor[motorC] = -100;
+		wait1Msec(42);
 		motor[motorB] = 10;
 		motor[motorC] = -10;
-		wait1Msec((int) getLeftWheelRelative().x * 393 / 5);
+		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4));
 		motor[motorB] = 100;
 		motor[motorC] = 100;
 		wait1Msec(1000);

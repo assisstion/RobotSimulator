@@ -3,6 +3,7 @@ package com.github.assisstion.RobotSimulator.sensor;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.util.Map;
 
 import com.github.assisstion.RobotSimulator.RobotCanvas;
 import com.github.assisstion.RobotSimulator.RobotProgram;
@@ -20,6 +21,7 @@ public class TouchSensor implements Sensor{
 		range = d;
 	}
 
+	//1 for colliding, 2 for "on a shape"
 	@Override
 	public int sensorValue(){
 		Vector2 sensorVector = RobotCanvas.relativeVector(program.getRightWheel(),
@@ -27,11 +29,16 @@ public class TouchSensor implements Sensor{
 		Ellipse2D.Double ellipse = new Ellipse2D.Double(
 				sensorVector.x - range/2, sensorVector.y - range/2,
 				range, range);
-		for(Shape shape : program.getShapes()){
+		for(Map.Entry<Shape, Boolean> shape : program.getShapes().entrySet()){
 			Area ellipseArea = new Area(ellipse);
-			ellipseArea.intersect(new Area(shape));
+			ellipseArea.intersect(new Area(shape.getKey()));
 			if(!ellipseArea.isEmpty()){
-				return 1;
+				if(shape.getValue()){
+					return 1;
+				}
+				else{
+					return 2;
+				}
 			}
 		}
 		return 0;

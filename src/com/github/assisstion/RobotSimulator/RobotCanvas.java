@@ -3,6 +3,7 @@ package com.github.assisstion.RobotSimulator;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -13,7 +14,6 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
@@ -31,7 +31,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private Map<Object, Supplier<Boolean>> waitLocks = new HashMap<Object,
 			Supplier<Boolean>>();
 
-	protected Set<Shape> shapes = new HashSet<Shape>();
+	//Boolean: does collide
+	protected Map<Shape, Boolean> shapes = new HashMap<Shape, Boolean>();
 
 	//Position relative to the right wheel
 	//(5.0f, 0)
@@ -45,9 +46,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	public double[] motor = new double[3];
 
-	public static final int motorA = -1;
-	public static final int motorB = 0;
-	public static final int motorC = 1;
+	public static final int motorA = 0;
+	public static final int motorB = 1;
+	public static final int motorC = 2;
 
 
 	//protected int speedMultiplier = 100;
@@ -63,6 +64,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected long frameCounter = 0;
 	private long lastNano = 0;
 	private long diff = 1000000;
+	private double aboveY;
+	private double belowY;
+
+	private boolean rect = false;
 
 	/**
 	 *
@@ -76,14 +81,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		new Thread(new RobotCanvasRunner()).start();
 	}
 
-	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double direction
-			, double initialLeftSpeed, double initialRightSpeed ){
+	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double aboveY,
+			double belowY, double direction
+			, double initialLeftSpeed, double initialRightSpeed, boolean rect){
+		this.rect = rect;
 		rightWheel = new Vector2(rightWheelStart);
 		leftWheel = new Vector2(wheelDistance, 0);
 		this.direction = direction;
 		motor[motorB] = initialLeftSpeed;
 		motor[motorC] = initialRightSpeed;
 		enabled = true;
+		this.aboveY = aboveY;
+		this.belowY = belowY;
 		new Thread(new RobotCanvasRunner()).start();
 	}
 
@@ -167,13 +176,23 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		g2d.fillOval((int)(centerX - leftWheel.x / 2), (int)(centerY - leftWheel.x / 2),
 				(int) leftWheel.x, (int) leftWheel.x);
 		 */
-		g2d.fill(getWheelEllipse());
-		for(Shape shape : shapes){
-			g2d.draw(shape);
+		if(rect){
+			g2d.fill(getRobotRect());
+		}
+		else{
+			g2d.fill(getRobotEllipse());
+		}
+		g2d.setColor(Color.GRAY);
+		for(Map.Entry<Shape, Boolean> shape : shapes.entrySet()){
+			if(shape.getValue()){
+				g2d.fill(shape.getKey());
+			}
+			else{
+				g2d.draw(shape.getKey());
+			}
 		}
 		g2d.setColor(Color.RED);
-		RobotProgramSample rps = new RobotProgramSample();
-		float width = rps.ROBOT_WIDTH;
+		double width = leftWheel.x;
 		g2d.drawString("WIDTH: " + width + "cm", 100, 100);
 		g2d.drawLine(100, 125, 100, 135);
 		g2d.drawLine(200, 125, 200, 135);
@@ -208,8 +227,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	public boolean resolveWheel(double dist){
 		rightWheel.y += -Math.cos(direction) * dist;
 		rightWheel.x += Math.sin(direction) * dist;
-		Ellipse2D.Double e2dd = getWheelEllipse();
-		for(Shape shape : shapes){
+		Shape e2dd;
+		if(rect){
+			e2dd = getRobotRect();
+		}
+		else{
+			e2dd = getRobotEllipse();
+		}
+		for(Map.Entry<Shape, Boolean> shapeHolder : shapes.entrySet()){
+			if(!shapeHolder.getValue()){
+				return true;
+			}
+			Shape shape = shapeHolder.getKey();
 			Area ae2dd = new Area(e2dd);
 			ae2dd.intersect(new Area(shape));
 			if(!ae2dd.isEmpty()){
@@ -219,7 +248,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		return true;
 	}
 
-	public Ellipse2D.Double getWheelEllipse(){
+	public Ellipse2D.Double getRobotEllipse(){
 		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
 		double subX = sub.x;
 		double subY = sub.y;
@@ -227,6 +256,25 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		double centerY = (rightWheel.y + subY) / 2;
 		return new Ellipse2D.Double(centerX - leftWheel.x / 2, centerY - leftWheel.x / 2,
 				leftWheel.x, leftWheel.x);
+	}
+
+	public Polygon getRobotRect(){
+		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
+		double aXSub = aboveY * Math.sin(direction);
+		double aYSub = aboveY * -Math.cos(direction);
+		double bXSub = belowY * Math.sin(direction);
+		double bYSub = belowY * -Math.cos(direction);
+		int[] pointsX = new int[4];
+		int[] pointsY = new int[4];
+		pointsX[0] = (int)(rightWheel.x + aXSub);
+		pointsY[0] = (int)(rightWheel.y + aYSub);
+		pointsX[1] = (int)(sub.x + aXSub);
+		pointsY[1] = (int)(sub.y + aYSub);
+		pointsX[2] = (int)(sub.x - bXSub);
+		pointsY[2] = (int)(sub.y - bYSub);
+		pointsX[3] = (int)(rightWheel.x - bXSub);
+		pointsY[3] = (int)(rightWheel.y - bYSub);
+		return new Polygon(pointsX, pointsY, 4);
 	}
 
 	protected class RobotCanvasRunner implements Runnable{
@@ -380,5 +428,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	public double getDirection(){
 		return direction;
+	}
+
+	public boolean isRect(){
+		return rect;
 	}
 }

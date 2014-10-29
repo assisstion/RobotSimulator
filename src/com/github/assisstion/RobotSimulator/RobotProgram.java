@@ -2,7 +2,7 @@ package com.github.assisstion.RobotSimulator;
 
 import java.awt.EventQueue;
 import java.awt.Shape;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.swing.JFrame;
@@ -18,13 +18,15 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 		super();
 	}*/
 
-	public RobotProgram(Vector2 rightWheelStart, float wheelDistance, float direction
-			, float initialLeftSpeed, float initialRightSpeed ){
-		super(rightWheelStart, wheelDistance, direction, initialLeftSpeed, initialRightSpeed);
+	public RobotProgram(Vector2 rightWheelStart, float wheelDistance, double aboveY,
+			double belowY, float direction
+			, float initialLeftSpeed, float initialRightSpeed, boolean rect){
+		super(rightWheelStart, wheelDistance, aboveY, belowY,
+				direction, initialLeftSpeed, initialRightSpeed, rect);
 	}
 
 	@Override
-	public Set<Shape> getShapes(){
+	public Map<Shape, Boolean> getShapes(){
 		return shapes;
 	}
 
