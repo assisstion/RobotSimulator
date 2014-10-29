@@ -43,10 +43,12 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected double direction = Math.PI / 2;
 	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	public double[] motor = new double[2];
+	public double[] motor = new double[3];
 
-	public static final int motorA = 0;
-	public static final int motorB = 1;
+	public static final int motorA = -1;
+	public static final int motorB = 0;
+	public static final int motorC = 1;
+
 
 	//protected int speedMultiplier = 100;
 	private int updatesPerSecond = 1000;
@@ -79,8 +81,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		rightWheel = new Vector2(rightWheelStart);
 		leftWheel = new Vector2(wheelDistance, 0);
 		this.direction = direction;
-		motor[motorA] = initialLeftSpeed;
-		motor[motorB] = initialRightSpeed;
+		motor[motorB] = initialLeftSpeed;
+		motor[motorC] = initialRightSpeed;
 		enabled = true;
 		new Thread(new RobotCanvasRunner()).start();
 	}
@@ -169,6 +171,15 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		for(Shape shape : shapes){
 			g2d.draw(shape);
 		}
+		g2d.setColor(Color.RED);
+		RobotProgramSample rps = new RobotProgramSample();
+		float width = rps.ROBOT_WIDTH;
+		g2d.drawString("WIDTH: " + width + "cm", 100, 100);
+		g2d.drawLine(100, 125, 100, 135);
+		g2d.drawLine(200, 125, 200, 135);
+		g2d.drawLine(100, 130, 200, 130);
+		g2d.drawString("1m", 135, 140);
+
 	}
 
 	public static Vector2 relativeVector(Vector2 orig, Vector2 add, double direction){
@@ -181,9 +192,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	//Diff in nanos
 	public void updateMotion(long diff){
 		double a = 1000000000 / diff;
-		double roc = (motor[motorA] - motor[motorB]) / leftWheel.x;
+		double roc = (motor[motorB] - motor[motorC]) / leftWheel.x;
 		direction += roc / a;
-		double speed = motor[motorB] / a;
+		double speed = motor[motorC] / a;
 		if(!resolveWheel(speed)){
 			rightWheel.y -= -Math.cos(direction) * speed;
 			rightWheel.x -= Math.sin(direction) * speed;
@@ -320,6 +331,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				setPaused(!isPaused());
 			}
 		}
+
 	}
 
 	public Object getWaitLock(Supplier<Boolean> condition){

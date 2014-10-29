@@ -12,12 +12,12 @@ public class TouchSensor implements Sensor{
 
 	protected RobotProgram program;
 	protected Vector2 relativeLocation;
-	protected float range;
+	protected double range;
 
-	public TouchSensor(RobotProgram program, Vector2 relativeLocation, float range){
+	public TouchSensor(RobotProgram program, Vector2 relativeLocation, double d){
 		this.program = program;
 		this.relativeLocation = relativeLocation;
-		this.range = range;
+		range = d;
 	}
 
 	@Override

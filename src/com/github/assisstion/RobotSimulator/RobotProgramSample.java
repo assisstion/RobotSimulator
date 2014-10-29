@@ -9,11 +9,13 @@ public class RobotProgramSample extends RobotProgram{
 
 	protected TouchSensor sensor;
 
+	public static final float ROBOT_WIDTH = 20.1f;
+
 	public RobotProgramSample(){
-		super(new Vector2(300, 300), 5.0f, 0, 0, 0);
+		super(new Vector2(300, 300), ROBOT_WIDTH, 0, 0, 0);
 		shapes.add(new Rectangle2D.Double(270, 100, 50, 50));
 		sensor = new TouchSensor(this, new Vector2(
-				getLeftWheelRelative().x / 2, getLeftWheelRelative().x / 2), 0.2f);
+				getLeftWheelRelative().x / 2, getLeftWheelRelative().x / 2), 0.2 * getLeftWheelRelative().x / 5);
 	}
 
 	private static final long serialVersionUID = 346397218252074433L;
@@ -24,20 +26,21 @@ public class RobotProgramSample extends RobotProgram{
 		/*
 		 * Move until you reach a wall, then turn, and move for 100 pixels
 		 */
-		motor[motorA] = 100;
 		motor[motorB] = 100;
+		motor[motorC] = 100;
 		waitUntil(() -> SensorValue(sensor) == 1);
-		motor[motorA] = -100;
-		motor[motorB] = -100;
-		wait1Msec(10);
-		motor[motorA] = 10;
-		motor[motorB] = -10;
-		wait1Msec(393);
-		motor[motorA] = 100;
+		wait1Msec(500);
+		motor[motorB] = -20;
+		motor[motorC] = -20;
+		wait1Msec(200);
+		motor[motorB] = 10;
+		motor[motorC] = -10;
+		wait1Msec((int) getLeftWheelRelative().x * 393 / 5);
 		motor[motorB] = 100;
+		motor[motorC] = 100;
 		wait1Msec(1000);
-		motor[motorA] = 0;
 		motor[motorB] = 0;
+		motor[motorC] = 0;
 
 		/*
 		float speed = 100;
