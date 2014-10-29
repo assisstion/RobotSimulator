@@ -135,23 +135,28 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		//g2d.setColor(Color.BLACK);
 		//g2d.fillRect(0, 0, 10, 10);
 		for(Pair<Integer, Integer> point : points){
-			g2d.drawLine(point.getValueOne(), point.getValueTwo(),
-					point.getValueOne(), point.getValueTwo());
+			g2d.drawRect(point.getValueOne(), point.getValueTwo(),
+					0, 0);
 		}
 		g2d.setColor(Color.RED);
 		g2d.fillOval((int) rightWheel.x - 2, (int) rightWheel.y - 2,
 				4, 4);
 		g2d.setColor(Color.GREEN);
-		double subX = rightWheel.x - Math.cos(direction) * leftWheel.x
-				+ Math.sin(direction) * leftWheel.y;
-		double subY = rightWheel.y - Math.cos(direction) * leftWheel.y
-				- Math.sin(direction) * leftWheel.x;
+		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
+		double subX = sub.x;
+		double subY = sub.y;
 		g2d.fillOval((int) subX - 2, (int) subY - 2, 4, 4);
 		g2d.setColor(Color.BLUE);
 		double centerX = (rightWheel.x + subX) / 2;
 		double centerY = (rightWheel.y + subY) / 2;
 		g2d.fillOval((int)(centerX - leftWheel.x / 2), (int)(centerY - leftWheel.x / 2),
 				(int) leftWheel.x, (int) leftWheel.x);
+	}
+
+	public static Vector2 relativeVector(Vector2 orig, Vector2 add, double direction){
+		return new Vector2(orig.x - Math.cos(direction) * add.x
+				+ Math.sin(direction) * add.y, orig.y - Math.cos(direction) * add.y
+				- Math.sin(direction) * add.x);
 	}
 
 
@@ -163,11 +168,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		double speed = motor[motorB] / a;
 		rightWheel.y += -Math.cos(direction) * speed;
 		rightWheel.x += Math.sin(direction) * speed;
+		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
 		points.add(Pair.make((int)rightWheel.x, (int)rightWheel.y));
-		points.add(Pair.make((int)(rightWheel.x - Math.cos(direction) * leftWheel.x
-				+ Math.sin(direction) * leftWheel.y), (int)(rightWheel.y
-						- Math.cos(direction) * leftWheel.y
-						- Math.sin(direction) * leftWheel.x)));
+		points.add(Pair.make((int)sub.x, (int)sub.y));
 	}
 
 	protected class RobotCanvasRunner implements Runnable{
@@ -290,5 +293,4 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	public void clearPoints(){
 		points.clear();
 	}
-
 }
