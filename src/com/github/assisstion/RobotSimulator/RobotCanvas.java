@@ -9,32 +9,45 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.swing.JPanel;
 
-public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListener{
+public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
-	protected float n = 0.50f;
-	protected float multi = 10;
-	protected Vector2 subPoint = new Vector2(n * multi, 0);
-	protected Vector2 currentPoint = new Vector2(300, 300);
+	private NavigableMap<Long, Object> frameCounterLocks =
+			new TreeMap<Long, Object>();
+
+	//5.0f
+	protected double wheelDistance = 5.0f;
+	protected Vector2 leftWheel = new Vector2(wheelDistance, 0);
+	//(300, 300)
+	protected Vector2 rightWheel = new Vector2(300, 300);
 	//In radians; 0 is top, pi/2 is right
-	protected float direction = (float)(Math.PI / 2);
-	protected Set<Pair<Integer, Integer>> newPoints = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
+	//(double)(Math.PI / 2)
+	protected double direction = Math.PI / 2;
 	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	protected float leftSpeed = 90f;
-	protected float rightSpeed = 100f;
+	protected double[] motor = new double[2];
+
+	protected static final int motorA = 0;
+	protected static final int motorB = 1;
 
 	//protected int speedMultiplier = 100;
-	protected int updatesPerSecond = 300;
-	protected int updatesPerPaint = 5;
+	protected int updatesPerSecond = 1000;
+	protected int updatesPerPaint = 15;
 
 	private Object pauseLock = new Object();
-	protected boolean paused;
-	protected boolean enabled;
+	private boolean paused;
+	private boolean enabled;
+
+	private int paintCounter = 0;
+	protected long frameCounter = 0;
+	protected long lastNano = 0;
+	protected long diff = 1000000;
 
 	/**
 	 *
@@ -42,8 +55,22 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 	private static final long serialVersionUID = -9117978120156221878L;
 
 	public RobotCanvas(){
+		//motor[motorA] = -100;
+		//motor[motorB] = -100;
 		enabled = true;
-		new Thread(this).start();
+		new Thread(new RobotCanvasRunner()).start();
+	}
+
+	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double direction
+			, double initialLeftSpeed, double initialRightSpeed ){
+		this.wheelDistance = wheelDistance;
+		rightWheel = new Vector2(rightWheelStart);
+		leftWheel = new Vector2(wheelDistance, 0);
+		this.direction = direction;
+		motor[motorA] = initialLeftSpeed;
+		motor[motorB] = initialRightSpeed;
+		enabled = true;
+		new Thread(new RobotCanvasRunner()).start();
 	}
 
 	@Override
@@ -107,104 +134,89 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		g2d.clearRect(0, 0, getWidth(), getHeight());
 		//g2d.setColor(Color.BLACK);
 		//g2d.fillRect(0, 0, 10, 10);
-		points.addAll(newPoints);
-		newPoints.clear();
 		for(Pair<Integer, Integer> point : points){
 			g2d.drawLine(point.getValueOne(), point.getValueTwo(),
 					point.getValueOne(), point.getValueTwo());
 		}
 		g2d.setColor(Color.RED);
-		g2d.fillOval((int) currentPoint.x - 2, (int) currentPoint.y - 2,
+		g2d.fillOval((int) rightWheel.x - 2, (int) rightWheel.y - 2,
 				4, 4);
 		g2d.setColor(Color.GREEN);
-		int subX = (int) (currentPoint.x - Math.cos(direction) * subPoint.x
-				+ Math.sin(direction) * subPoint.y);
-		int subY = (int)(currentPoint.y - Math.cos(direction) * subPoint.y
-				- Math.sin(direction) * subPoint.x);
+		int subX = (int) (rightWheel.x - Math.cos(direction) * leftWheel.x
+				+ Math.sin(direction) * leftWheel.y);
+		int subY = (int)(rightWheel.y - Math.cos(direction) * leftWheel.y
+				- Math.sin(direction) * leftWheel.x);
 		g2d.fillOval(subX - 2, subY - 2, 4, 4);
 
 	}
 
 
-	public void updateMotion(){
-		float roc;
-		if(leftSpeed == rightSpeed){
-			roc = 0;
-		}
-		else{
-			//if(outSpeed == 0){
-			//	roc = 1000000000f;
-			//movement = 0;
-			//}
-			//if(inSpeed < outSpeed){
-			roc = (leftSpeed - rightSpeed) / n;
-			////roc = 1/ (n / (inSpeed/outSpeed - 1.0f));
-			//}
-			//else{
-			//	roc = -n / (outSpeed/inSpeed - 1.0f);
-			//}
-			//}
-			//else{
-			//	roc = -n / (outSpeed/inSpeed - 1);
-			//}
-		}
-		direction += roc / updatesPerSecond / multi;
-		//direction += roc / updatesPerSecond * outSpeed;
-		float speed = rightSpeed / updatesPerSecond;
-		currentPoint.y += -Math.cos(direction) * speed;
-		currentPoint.x += Math.sin(direction) * speed;
-		newPoints.add(Pair.make((int)currentPoint.x, (int)currentPoint.y));
-		newPoints.add(Pair.make((int)(currentPoint.x - Math.cos(direction) * subPoint.x
-				+ Math.sin(direction) * subPoint.y), (int)(currentPoint.y
-						- Math.cos(direction) * subPoint.y
-						- Math.sin(direction) * subPoint.x)));
+	//Diff in nanos
+	public void updateMotion(long diff){
+		double a = 1000000000 / diff;
+		double roc = (motor[motorA] - motor[motorB]) / wheelDistance;
+		direction += roc / a;
+		double speed = motor[motorB] / a;
+		rightWheel.y += -Math.cos(direction) * speed;
+		rightWheel.x += Math.sin(direction) * speed;
+		points.add(Pair.make((int)rightWheel.x, (int)rightWheel.y));
+		points.add(Pair.make((int)(rightWheel.x - Math.cos(direction) * leftWheel.x
+				+ Math.sin(direction) * leftWheel.y), (int)(rightWheel.y
+						- Math.cos(direction) * leftWheel.y
+						- Math.sin(direction) * leftWheel.x)));
 	}
 
-	protected int paintCounter = 0;
-
-	@Override
-	public void run(){
-		while(enabled){
-			while(paused){
-				try{
-					synchronized(pauseLock){
-						wait();
+	protected class RobotCanvasRunner implements Runnable{
+		@Override
+		public void run(){
+			lastNano = System.nanoTime();
+			while(enabled){
+				while(paused){
+					try{
+						synchronized(pauseLock){
+							wait();
+						}
 					}
+					catch(InterruptedException e){
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				try{
+					paintCounter--;
+					if(paintCounter <= 0){
+						repaint();
+						paintCounter = updatesPerPaint;
+					}
+					long curr = System.nanoTime();
+					diff = curr - lastNano;
+					frameCounter += diff;
+					lastNano = curr;
+					Long l = frameCounterLocks.lowerKey(frameCounter / 1000000);
+					while(l != null){
+						Object o = frameCounterLocks.get(l);
+						synchronized(o){
+							o.notifyAll();
+						}
+						frameCounterLocks.remove(l);
+						l = frameCounterLocks.lowerKey(frameCounter / 1000000);
+					}
+					Thread.sleep(1000 / updatesPerSecond);
 				}
 				catch(InterruptedException e){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				updateMotion(diff);
 			}
-			try{
-				paintCounter--;
-				if(paintCounter <= 0){
-					repaint();
-					paintCounter = updatesPerPaint;
-				}
-				Thread.sleep(1000 / updatesPerSecond);
-			}
-			catch(InterruptedException e){
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			updateMotion();
 		}
 	}
-
-
-
-
 
 	@Override
 	public void keyTyped(KeyEvent e){
 		// TODO Auto-generated method stub
 
 	}
-
-
-
-
 
 	/**
 	 * Keys
@@ -249,6 +261,17 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 
 
 
+	public Object getFrameCounterLock(long target){
+		Object o = frameCounterLocks.get(target);
+		if(o != null){
+			return o;
+		}
+		else{
+			Object o2 = new Object();
+			frameCounterLocks.put(target, o2);
+			return o2;
+		}
+	}
 
 
 	@Override
@@ -256,4 +279,9 @@ public class RobotCanvas extends JPanel implements Runnable, Printable, KeyListe
 		// TODO Auto-generated method stub
 
 	}
+
+	public void clearPoints(){
+		points.clear();
+	}
+
 }
