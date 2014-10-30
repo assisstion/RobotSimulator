@@ -72,13 +72,20 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	protected double panX = 0;
 	protected double panY = 0;
+	protected double zoom = 1.0;
 
-	protected boolean upPressed;
-	protected boolean downPressed;
-	protected boolean leftPressed;
-	protected boolean rightPressed;
+	protected boolean upPressed = false;
+	protected boolean downPressed = false;
+	protected boolean leftPressed = false;
+	protected boolean rightPressed = false;
+	protected boolean zoomIn = false;
+	protected boolean zoomOut = false;
 
-	protected double panPixelsPerSecond = 100;
+	protected boolean panned = false;
+
+	protected double panPixelsPerSecond = 300;
+	protected double scaleFactor = 0.95;
+	protected double scalePowerFactor = 100;
 
 	/**
 	 *
@@ -165,10 +172,17 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	public void draw(Graphics g){
 		paints++;
 		Graphics2D g2d = (Graphics2D) g;
+		if(!panned){
+			panX -= 0.5 * getWidth();
+			panY -= 0.5 * getHeight();
+			panned = true;
+		}
+		g2d.clearRect(0, 0,
+				getWidth(), getHeight());
+		g2d.translate(0.5 * getWidth(), 0.5 * getHeight());
+		g2d.scale(zoom, zoom);
 		g2d.translate(panX, panY);
 		g2d.setBackground(Color.WHITE);
-		g2d.clearRect((int) -panX, (int) -panY,
-				getWidth(), getHeight());
 		//g2d.setColor(Color.BLACK);
 		//g2d.fillRect(0, 0, 10, 10);
 		for(Pair<Integer, Integer> point : points){
@@ -240,16 +254,22 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	protected void updateScreen(long diff){
 		if(upPressed){
-			panY += diff / 1000000000.0 * panPixelsPerSecond;
+			panY += diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
 		if(downPressed){
-			panY -= diff / 1000000000.0 * panPixelsPerSecond;
+			panY -= diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
 		if(leftPressed){
-			panX += diff / 1000000000.0 * panPixelsPerSecond;
+			panX += diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
 		if(rightPressed){
-			panX -= diff / 1000000000.0 * panPixelsPerSecond;
+			panX -= diff / 1000000000.0 * panPixelsPerSecond / zoom;
+		}
+		if(zoomIn){
+			zoom /= Math.pow(scaleFactor, diff / 1000000000.0 * scalePowerFactor);
+		}
+		if(zoomOut){
+			zoom *= Math.pow(scaleFactor, diff / 1000000000.0 * scalePowerFactor);
 		}
 	}
 
@@ -379,17 +399,23 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 */
 	@Override
 	public void keyPressed(KeyEvent e){
-		if(e.getKeyCode() == KeyEvent.VK_UP){
+		if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W){
 			upPressed = true;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_DOWN){
+		if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S){
 			downPressed = true;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_LEFT){
+		if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A){
 			leftPressed = true;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+		if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D){
 			rightPressed = true;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_Q){
+			zoomOut = true;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_E){
+			zoomIn = true;
 		}
 		if(e.getKeyCode() == KeyEvent.VK_R){
 			try{
@@ -413,7 +439,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				e1.printStackTrace();
 			}
 		}
-		if(e.getKeyCode() == KeyEvent.VK_Q){
+		if(e.getKeyCode() == KeyEvent.VK_X){
 			setEnabled(false);
 		}
 		if(e.getKeyCode() == KeyEvent.VK_P){
@@ -446,17 +472,23 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	@Override
 	public void keyReleased(KeyEvent e){
-		if(e.getKeyCode() == KeyEvent.VK_UP){
+		if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W){
 			upPressed = false;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_DOWN){
+		if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S){
 			downPressed = false;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_LEFT){
+		if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A){
 			leftPressed = false;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+		if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D){
 			rightPressed = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_Q){
+			zoomOut = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_E){
+			zoomIn = false;
 		}
 	}
 
