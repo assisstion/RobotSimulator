@@ -66,6 +66,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private long diff = 1000000;
 	private double aboveY;
 	private double belowY;
+	protected long paints = 0;
 
 	private boolean rect = false;
 
@@ -152,6 +153,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	//Function for drawing called by paint and print
 	public void draw(Graphics g){
+		paints++;
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setBackground(Color.WHITE);
 		g2d.clearRect(0, 0, getWidth(), getHeight());
@@ -193,7 +195,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		}
 		g2d.setColor(Color.RED);
 		double width = leftWheel.x;
-		g2d.drawString("WIDTH: " + width + "cm", 100, 100);
+		g2d.drawString("WIDTH: " + width + "cm (pixels)", 100, 100);
 		g2d.drawLine(100, 125, 100, 135);
 		g2d.drawLine(200, 125, 200, 135);
 		g2d.drawLine(100, 130, 200, 130);
@@ -432,5 +434,13 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	public boolean isRect(){
 		return rect;
+	}
+
+	protected int getUpdatesPerSecond(){
+		return updatesPerSecond;
+	}
+
+	protected int getUpdatesPerPaint(){
+		return updatesPerPaint;
 	}
 }

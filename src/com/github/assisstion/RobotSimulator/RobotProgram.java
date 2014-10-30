@@ -77,14 +77,20 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 				frame.setBounds(100, 100, width, height);
 				frame.setContentPane(RobotProgram.this);
 				frame.addKeyListener(RobotProgram.this);
+				frame.setTitle("Robot Simulator");
 				frame.setVisible(true);
 				repaint();
-				startProgram();
+				new Thread(new RobotStarter()).start();
 			}
 		});
 	}
 
-	public void startProgram(){
-		new Thread(this).start();
+	protected class RobotStarter implements Runnable{
+		@Override
+		public void run(){
+			waitUntil(() -> paints > getUpdatesPerSecond() /
+					getUpdatesPerPaint() / 10 + 1);
+			new Thread(RobotProgram.this).start();
+		}
 	}
 }

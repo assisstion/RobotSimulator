@@ -33,6 +33,7 @@ public class RobotProgramSample extends RobotProgram{
 
 		/*
 		 * Move until you reach a wall, then turn, and move for 100 pixels
+		 * Then move back, turn back, and move into the wall again
 		 */
 		motor[motorB] = 100;
 		motor[motorC] = 100;
@@ -43,7 +44,7 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
 		motor[motorB] = 10;
 		motor[motorC] = -10;
-		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4));
+		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4) + 1);
 		motor[motorB] = 100;
 		motor[motorC] = 100;
 		wait1Msec(1000);
@@ -60,7 +61,7 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec(1000);
 		motor[motorB] = -10;
 		motor[motorC] = 10;
-		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4));
+		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4) + 1);
 		motor[motorB] = 100;
 		motor[motorC] = 100;
 		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
