@@ -70,6 +70,16 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	private boolean rect = false;
 
+	protected double panX = 0;
+	protected double panY = 0;
+
+	protected boolean upPressed;
+	protected boolean downPressed;
+	protected boolean leftPressed;
+	protected boolean rightPressed;
+
+	protected double panPixelsPerSecond = 100;
+
 	/**
 	 *
 	 */
@@ -155,8 +165,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	public void draw(Graphics g){
 		paints++;
 		Graphics2D g2d = (Graphics2D) g;
+		g2d.translate(panX, panY);
 		g2d.setBackground(Color.WHITE);
-		g2d.clearRect(0, 0, getWidth(), getHeight());
+		g2d.clearRect((int) -panX, (int) -panY,
+				getWidth(), getHeight());
 		//g2d.setColor(Color.BLACK);
 		//g2d.fillRect(0, 0, 10, 10);
 		for(Pair<Integer, Integer> point : points){
@@ -211,7 +223,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 
 	//Diff in nanos
-	public void updateMotion(long diff){
+	protected void updateMotion(long diff){
 		double a = 1000000000 / diff;
 		double roc = (motor[motorB] - motor[motorC]) / leftWheel.x;
 		direction += roc / a;
@@ -226,7 +238,22 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		points.add(Pair.make((int)sub.x, (int)sub.y));
 	}
 
-	public boolean resolveWheel(double dist){
+	protected void updateScreen(long diff){
+		if(upPressed){
+			panY += diff / 1000000000.0 * panPixelsPerSecond;
+		}
+		if(downPressed){
+			panY -= diff / 1000000000.0 * panPixelsPerSecond;
+		}
+		if(leftPressed){
+			panX += diff / 1000000000.0 * panPixelsPerSecond;
+		}
+		if(rightPressed){
+			panX -= diff / 1000000000.0 * panPixelsPerSecond;
+		}
+	}
+
+	protected boolean resolveWheel(double dist){
 		rightWheel.y += -Math.cos(direction) * dist;
 		rightWheel.x += Math.sin(direction) * dist;
 		Shape e2dd;
@@ -324,6 +351,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 					e.printStackTrace();
 				}
 				updateMotion(diff);
+				updateScreen(diff);
 				for(Map.Entry<Object, Supplier<Boolean>> condition : waitLocks.entrySet()){
 					if(condition.getValue().get()){
 						Object lock = condition.getKey();
@@ -351,7 +379,19 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 */
 	@Override
 	public void keyPressed(KeyEvent e){
-		if(e.getKeyChar() == 'r'){
+		if(e.getKeyCode() == KeyEvent.VK_UP){
+			upPressed = true;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_DOWN){
+			downPressed = true;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_LEFT){
+			leftPressed = true;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+			rightPressed = true;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_R){
 			try{
 				boolean tempPaused;
 				synchronized(pauseLock){
@@ -373,10 +413,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				e1.printStackTrace();
 			}
 		}
-		if(e.getKeyChar() == 'q'){
+		if(e.getKeyCode() == KeyEvent.VK_Q){
 			setEnabled(false);
 		}
-		if(e.getKeyChar() == 'p'){
+		if(e.getKeyCode() == KeyEvent.VK_P){
 			synchronized(this){
 				setPaused(!isPaused());
 			}
@@ -406,8 +446,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	@Override
 	public void keyReleased(KeyEvent e){
-		// TODO Auto-generated method stub
-
+		if(e.getKeyCode() == KeyEvent.VK_UP){
+			upPressed = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_DOWN){
+			downPressed = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_LEFT){
+			leftPressed = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+			rightPressed = false;
+		}
 	}
 
 	public void clearPoints(){
