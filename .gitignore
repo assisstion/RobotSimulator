@@ -21,6 +21,8 @@ hs_err_pid*
 settings/*
 data/*
 
+lib/*
+
 # Ignored Files #
 *.ignore
 

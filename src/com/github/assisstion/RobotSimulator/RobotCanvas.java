@@ -18,17 +18,22 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Supplier;
 
 import javax.swing.JPanel;
+
+import net.java.games.input.Component;
+import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
 
 public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	private NavigableMap<Long, Object> frameCounterLocks =
 			new TreeMap<Long, Object>();
 
-	private Map<Object, Supplier<Boolean>> waitLocks = new HashMap<Object,
+	private Map<Comparable<?>, Supplier<Boolean>> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
 			Supplier<Boolean>>();
 
 	//Boolean: does collide
@@ -44,12 +49,20 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected double direction = Math.PI / 2;
 	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	public double[] motor = new double[3];
+	protected Set<Integer> keysDown = new ConcurrentSkipListSet<Integer>();
 
-	public static final int motorA = 0;
-	public static final int motorB = 1;
-	public static final int motorC = 2;
+	protected double[] motor = new double[3];
 
+	protected static final int motorA = 0;
+	protected static final int motorB = 1;
+	protected static final int motorC = 2;
+
+	protected long paints = 0;
+	protected long updates = 0;
+	//In nanos
+	protected long frameCounter = 0;
+
+	protected Controller controller = null;
 
 	//protected int speedMultiplier = 100;
 	private int updatesPerSecond = 1000;
@@ -60,32 +73,22 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private boolean enabled;
 
 	private int paintCounter = 0;
-	//In nanos
-	protected long frameCounter = 0;
 	private long lastNano = 0;
 	private long diff = 1000000;
 	private double aboveY;
 	private double belowY;
-	protected long paints = 0;
 
 	private boolean rect = false;
 
-	protected double panX = 0;
-	protected double panY = 0;
-	protected double zoom = 1.0;
+	private double panX = 0;
+	private double panY = 0;
+	private double zoom = 1.0;
 
-	protected boolean upPressed = false;
-	protected boolean downPressed = false;
-	protected boolean leftPressed = false;
-	protected boolean rightPressed = false;
-	protected boolean zoomIn = false;
-	protected boolean zoomOut = false;
+	private boolean panned = false;
 
-	protected boolean panned = false;
-
-	protected double panPixelsPerSecond = 300;
-	protected double scaleFactor = 0.95;
-	protected double scalePowerFactor = 100;
+	private double panPixelsPerSecond = 300;
+	private double scaleFactor = 0.95;
+	private double scalePowerFactor = 100;
 
 	/**
 	 *
@@ -111,6 +114,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		enabled = true;
 		this.aboveY = aboveY;
 		this.belowY = belowY;
+		Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
+		for(Controller c : ca){
+			String n = c.getName();
+			System.out.println("Controller detected: " +  n);
+			if(n.equals("Logitech Dual Action")){
+				System.out.println("Attached controller");
+				controller = c;
+				for(Component cp : c.getComponents()){
+					System.out.println(cp.getName());
+				}
+			}
+		}
 		new Thread(new RobotCanvasRunner()).start();
 	}
 
@@ -226,7 +241,13 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		g2d.drawLine(200, 125, 200, 135);
 		g2d.drawLine(100, 130, 200, 130);
 		g2d.drawString("1m", 135, 140);
-
+		g2d.setColor(Color.BLACK);
+		if(controller != null){
+			int i = 0;
+			for(Component c : controller.getComponents()){
+				g2d.drawString(c.getName() + ": " + c.getPollData(), 10, 10 + i++ * 20);
+			}
+		}
 	}
 
 	public static Vector2 relativeVector(Vector2 orig, Vector2 add, double direction){
@@ -253,22 +274,26 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	}
 
 	protected void updateScreen(long diff){
-		if(upPressed){
+		if(keysDown.contains(KeyEvent.VK_UP)
+				|| keysDown.contains(KeyEvent.VK_W)){
 			panY += diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
-		if(downPressed){
+		if(keysDown.contains(KeyEvent.VK_DOWN)
+				|| keysDown.contains(KeyEvent.VK_S)){
 			panY -= diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
-		if(leftPressed){
+		if(keysDown.contains(KeyEvent.VK_LEFT)
+				|| keysDown.contains(KeyEvent.VK_A)){
 			panX += diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
-		if(rightPressed){
+		if(keysDown.contains(KeyEvent.VK_RIGHT)
+				|| keysDown.contains(KeyEvent.VK_D)){
 			panX -= diff / 1000000000.0 * panPixelsPerSecond / zoom;
 		}
-		if(zoomIn){
+		if(keysDown.contains(KeyEvent.VK_E)){
 			zoom /= Math.pow(scaleFactor, diff / 1000000000.0 * scalePowerFactor);
 		}
-		if(zoomOut){
+		if(keysDown.contains(KeyEvent.VK_Q)){
 			zoom *= Math.pow(scaleFactor, diff / 1000000000.0 * scalePowerFactor);
 		}
 	}
@@ -349,6 +374,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 					paintCounter--;
 					if(paintCounter <= 0){
 						repaint();
+						updateController();
 						paintCounter = updatesPerPaint;
 					}
 					long curr = System.nanoTime();
@@ -370,9 +396,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				updates++;
 				updateMotion(diff);
 				updateScreen(diff);
-				for(Map.Entry<Object, Supplier<Boolean>> condition : waitLocks.entrySet()){
+				for(Map.Entry<Comparable<?>, Supplier<Boolean>> condition : waitLocks.entrySet()){
 					if(condition.getValue().get()){
 						Object lock = condition.getKey();
 						synchronized(lock){
@@ -382,6 +409,13 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				}
 			}
 		}
+	}
+
+	protected void updateController(){
+		if(controller == null){
+			return;
+		}
+		controller.poll();
 	}
 
 	@Override
@@ -399,24 +433,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 */
 	@Override
 	public void keyPressed(KeyEvent e){
-		if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W){
-			upPressed = true;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S){
-			downPressed = true;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A){
-			leftPressed = true;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D){
-			rightPressed = true;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_Q){
-			zoomOut = true;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_E){
-			zoomIn = true;
-		}
+		keysDown.add(e.getKeyCode());
 		if(e.getKeyCode() == KeyEvent.VK_R){
 			try{
 				boolean tempPaused;
@@ -447,11 +464,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				setPaused(!isPaused());
 			}
 		}
-
 	}
 
+
 	public Object getWaitLock(Supplier<Boolean> condition){
-		Object o = new Object();
+		Comparable<?> o = new Comparable<Object>(){
+
+			@Override
+			public int compareTo(Object o){
+				return Integer.compare(hashCode(), o.hashCode());
+			}
+
+		};
 		waitLocks.put(o, condition);
 		return o;
 	}
@@ -472,24 +496,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	@Override
 	public void keyReleased(KeyEvent e){
-		if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W){
-			upPressed = false;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S){
-			downPressed = false;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A){
-			leftPressed = false;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D){
-			rightPressed = false;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_Q){
-			zoomOut = false;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_E){
-			zoomIn = false;
-		}
+		keysDown.remove(e.getKeyCode());
 	}
 
 	public void clearPoints(){
