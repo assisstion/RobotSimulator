@@ -99,7 +99,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		//motor[motorA] = -100;
 		//motor[motorB] = -100;
 		enabled = true;
-		new Thread(new RobotCanvasRunner()).start();
 	}
 
 	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double aboveY,
@@ -126,6 +125,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				}
 			}
 		}
+	}
+
+	public void start(){
 		new Thread(new RobotCanvasRunner()).start();
 	}
 

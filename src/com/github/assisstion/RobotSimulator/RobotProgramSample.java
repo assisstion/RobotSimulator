@@ -97,6 +97,6 @@ public class RobotProgramSample extends RobotProgram{
 	}
 
 	public static void main(String[] args){
-		new RobotProgramSample().startMain();
+		new RobotProgramSample().init();
 	}
 }

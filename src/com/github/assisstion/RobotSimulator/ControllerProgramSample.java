@@ -2,12 +2,12 @@ package com.github.assisstion.RobotSimulator;
 
 import net.java.games.input.Component;
 
-public class ControllerProgrammingSample extends RobotProgram{
+public class ControllerProgramSample extends RobotProgram{
 
 	private static final long serialVersionUID = 8368673221320981088L;
 	private static final float ROBOT_SIDE = 10.0f;
 
-	public ControllerProgrammingSample(){
+	public ControllerProgramSample(){
 		super(new Vector2(150, 150), ROBOT_SIDE, ROBOT_SIDE/2, ROBOT_SIDE/2, 0,
 				0, 0, true);
 		// TODO Auto-generated constructor stub
@@ -45,6 +45,6 @@ public class ControllerProgrammingSample extends RobotProgram{
 	}
 
 	public static void main(String[] args){
-		new ControllerProgrammingSample().startMain();
+		new ControllerProgramSample().init();
 	}
 }

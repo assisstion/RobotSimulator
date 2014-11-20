@@ -68,7 +68,8 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 		}
 	}
 
-	public void startMain(){
+	public void init(){
+		start();
 		EventQueue.invokeLater(new Runnable(){
 			@Override
 			public void run(){
