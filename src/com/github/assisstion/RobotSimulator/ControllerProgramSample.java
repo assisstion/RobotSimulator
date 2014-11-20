@@ -8,9 +8,7 @@ public class ControllerProgramSample extends RobotProgram{
 	private static final float ROBOT_SIDE = 10.0f;
 
 	public ControllerProgramSample(){
-		super(new Vector2(150, 150), ROBOT_SIDE, ROBOT_SIDE/2, ROBOT_SIDE/2, 0,
-				0, 0, true);
-		// TODO Auto-generated constructor stub
+		super(ROBOT_SIDE, true);
 	}
 
 	protected long lastFrameNum = 0;
