@@ -3,7 +3,7 @@ package com.github.assisstion.RobotSimulator;
 import java.awt.EventQueue;
 import java.awt.Shape;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 import javax.swing.JFrame;
 
@@ -46,9 +46,9 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 		return motor;
 	}
 
-	public void waitUntil(Supplier<Boolean> condition){
+	public void waitUntil(BooleanSupplier condition){
 		Object o = getWaitLock(condition);
-		while(!condition.get()){
+		while(!condition.getAsBoolean()){
 			synchronized(o){
 				try{
 					o.wait();

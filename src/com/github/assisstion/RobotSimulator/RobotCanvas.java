@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 import javax.swing.JPanel;
 
@@ -34,8 +34,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private NavigableMap<Long, Object> frameCounterLocks =
 			new TreeMap<Long, Object>();
 
-	private Map<Comparable<?>, Supplier<Boolean>> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
-			Supplier<Boolean>>();
+	private Map<Comparable<?>, BooleanSupplier> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
+			BooleanSupplier>();
 
 	//Boolean: does collide
 	protected Map<Shape, Boolean> shapes = new HashMap<Shape, Boolean>();
@@ -68,8 +68,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private long frameCounter = 0;
 
 	//protected int speedMultiplier = 100;
-	private int updatesPerSecond = 100;
-	private int updatesPerPaint = 2;
+	private int updatesPerSecond = 250;
+	private int updatesPerPaint = updatesPerSecond/50 + 1;
 
 	private Object pauseLock = new Object();
 	private boolean paused;
@@ -413,8 +413,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				updateMotion(diff);
 				updateScreen(diff);
 				Set<Object> toBeRemovedLocks = new HashSet<Object>();
-				for(Map.Entry<Comparable<?>, Supplier<Boolean>> condition : waitLocks.entrySet()){
-					if(condition.getValue().get()){
+				for(Map.Entry<Comparable<?>, BooleanSupplier> condition : waitLocks.entrySet()){
+					if(condition.getValue().getAsBoolean()){
 						Object lock = condition.getKey();
 						synchronized(lock){
 							lock.notifyAll();
@@ -490,7 +490,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	}
 
 
-	public Object getWaitLock(Supplier<Boolean> condition){
+	public Object getWaitLock(BooleanSupplier condition){
 		Comparable<?> o = new Comparable<Object>(){
 
 			@Override

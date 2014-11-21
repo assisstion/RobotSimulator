@@ -69,22 +69,9 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
 		motor[motorB] = 0;
 		motor[motorC] = 0;
-
-		/*
-		float speed = 100;
-		while(true){
-			motor[motorA] = speed;
-			motor[motorB] = speed - leftWheel.x * speed / 100;
-			wait1Msec((int)(Math.PI * 200000 / speed));
-			motor[motorA] = speed - leftWheel.x * speed / 100;
-			motor[motorB] = speed;
-			wait1Msec((int)(Math.PI * 200000 / speed));
-			clearPoints();
-		}
-		 */
 	}
 
-	long lastSensorValue = -1;
+	protected long lastSensorValue = -1;
 
 	@Override
 	public void updateMotion(long diff){
