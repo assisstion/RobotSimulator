@@ -116,6 +116,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		enabled = true;
 		this.aboveY = aboveY;
 		this.belowY = belowY;
+		controllerSetup();
+	}
+
+	public void controllerSetup(){
 		Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		for(Controller c : ca){
 			String n = c.getName();
@@ -123,9 +127,13 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 			if(n.equals("Logitech Dual Action")){
 				System.out.println("Attached controller");
 				controller = c;
+				System.out.print("Components: ");
+				boolean first = true;
 				for(Component cp : c.getComponents()){
-					System.out.println(cp.getName());
+					System.out.print((first ? "" : ", ") + cp.getName());
+					first = false;
 				}
+				System.out.println();
 			}
 		}
 	}

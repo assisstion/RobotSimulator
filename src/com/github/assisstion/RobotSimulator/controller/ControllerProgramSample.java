@@ -54,34 +54,33 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 
 	@Override
 	public void buttonPressed(Button button){
-		if(button.equals(Button.A)){
-			System.out.println("a");
-		}
+		System.out.println("Button pressed: " + button.getName());
 	}
 
 	@Override
 	public void buttonReleased(Button button){
-		if(button.equals(Button.A)){
-			System.out.println("a!");
-		}
+		System.out.println("Button released: " + button.getName());
 	}
 
 	@Override
 	public void triggerChanged(Trigger trigger, float newValue){
-		if(trigger.equals(Trigger.LEFT_TRIGGER)){
-			if(newValue == 0){
-				System.out.println("r!");
-			}
-			else{
-				System.out.println("r");
-			}
+		if(newValue == 0){
+			System.out.println("Trigger released: " + trigger.getName());
+		}
+		else{
+			System.out.println("Trigger pressed: " + trigger.getName());
 		}
 	}
 
 	@Override
 	public void joystickChanged(Joystick joystick, boolean x, float newValue){
-		if(joystick.equals(Joystick.LEFT_JOYSTICK)){
-			System.out.println("move");
-		}
+		System.out.println("Joystick " + (x?"x":"y") + " changed: "
+				+ joystick.getName() + "; New value: " + newValue);
+	}
+
+	@Override
+	public boolean isJoystickEnabled(){
+		//Suppress joystick output
+		return false;
 	}
 }

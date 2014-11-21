@@ -39,6 +39,11 @@ public class StandardRobotController implements RobotController{
 	@Override
 	public boolean poll(){
 		boolean b = controller.poll();
+		fireListeners();
+		return b;
+	}
+
+	public void fireListeners(){
 		for(Component c : controller.getComponents()){
 			Component.Identifier id = c.getIdentifier();
 			float pd = c.getPollData();
@@ -55,7 +60,6 @@ public class StandardRobotController implements RobotController{
 				}
 			}
 		}
-		return b;
 	}
 
 	public class ControllerEventDispatcher implements Runnable{
@@ -77,6 +81,9 @@ public class StandardRobotController implements RobotController{
 		public void run(){
 			switch(mapping.getIDType(id)){
 				case "button":
+					if(!c.isButtonEnabled()){
+						break;
+					}
 					if(pd == 0.0f){
 						c.buttonReleased(mapping.getButtonFromID(id));
 					}
@@ -85,13 +92,22 @@ public class StandardRobotController implements RobotController{
 					}
 					break;
 				case "trigger":
+					if(!c.isTriggerEnabled()){
+						break;
+					}
 					c.triggerChanged(mapping.getTriggerFromID(id), pd);
 					break;
 				case "joystick":
+					if(!c.isJoystickEnabled()){
+						break;
+					}
 					c.joystickChanged(mapping.getJoystickFromID(id),
 							mapping.isJoystickX(id), pd);
 					break;
 				case "pov":
+					if(!c.isButtonEnabled()){
+						break;
+					}
 					Button[] ba = mapping.getPOVButton(last);
 					Button[] ba2 = mapping.getPOVButton(pd);
 					List<Button> released = new ArrayList<Button>();
