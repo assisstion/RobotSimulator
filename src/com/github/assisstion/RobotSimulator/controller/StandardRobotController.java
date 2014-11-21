@@ -1,4 +1,4 @@
-package com.github.assisstion.RobotSimulator;
+package com.github.assisstion.RobotSimulator.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Trigger;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;

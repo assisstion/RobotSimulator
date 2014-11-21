@@ -1,8 +1,9 @@
-package com.github.assisstion.RobotSimulator;
+package com.github.assisstion.RobotSimulator.controller;
 
-import com.github.assisstion.RobotSimulator.RobotController.Button;
-import com.github.assisstion.RobotSimulator.RobotController.Joystick;
-import com.github.assisstion.RobotSimulator.RobotController.Trigger;
+import com.github.assisstion.RobotSimulator.RobotProgram;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Trigger;
 
 public class ControllerProgramSample extends RobotProgram implements StandardControllerListener{
 

@@ -1,4 +1,4 @@
-package com.github.assisstion.RobotSimulator;
+package com.github.assisstion.RobotSimulator.controller;
 
 public interface RobotController{
 

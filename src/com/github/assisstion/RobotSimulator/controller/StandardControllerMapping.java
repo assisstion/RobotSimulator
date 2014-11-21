@@ -1,11 +1,11 @@
-package com.github.assisstion.RobotSimulator;
+package com.github.assisstion.RobotSimulator.controller;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 
-import com.github.assisstion.RobotSimulator.RobotController.Button;
-import com.github.assisstion.RobotSimulator.RobotController.Joystick;
-import com.github.assisstion.RobotSimulator.RobotController.Trigger;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
+import com.github.assisstion.RobotSimulator.controller.RobotController.Trigger;
 
 public class StandardControllerMapping implements ControllerMapping{
 
