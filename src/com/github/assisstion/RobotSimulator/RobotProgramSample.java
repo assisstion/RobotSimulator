@@ -24,7 +24,7 @@ public class RobotProgramSample extends RobotProgram{
 		, Color.BLACK);
 		shapes.put(ball, false);
 		sensor = new TouchSensor(this, new Vector2(
-				getLeftWheelRelative().x / 2, a), 0.2 * getLeftWheelRelative().x / 5);
+				getLeftWheelRelative().x / 2, a), 0.001 * getLeftWheelRelative().x / 5);
 	}
 
 	private static final long serialVersionUID = 346397218252074433L;

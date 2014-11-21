@@ -99,6 +99,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private double scaleFactor = 0.95;
 	private double scalePowerFactor = 100;
 
+	private int subCollisionIterations = 16;
+
 	//Effectively final
 	private Vector2 defaultRightWheelStart;
 	private double defaultWheelDistance;
@@ -299,10 +301,15 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		double roc = (motor[motorB] - motor[motorC]) / leftWheel.x;
 		direction += roc / a;
 		double speed = motor[motorC] / a;
-		if(!resolveWheel(speed)){
+		int counter = 0;
+		while(!resolveWheel(speed)){
 			rightWheel.y -= -Math.cos(direction) * speed;
 			rightWheel.x -= Math.sin(direction) * speed;
 			direction -= roc / a;
+			speed /= 2;
+			if(counter++ >= subCollisionIterations){
+				break;
+			}
 		}
 		if(drawing){
 			Vector2 sub = relativeVector(rightWheel, leftWheel, direction);

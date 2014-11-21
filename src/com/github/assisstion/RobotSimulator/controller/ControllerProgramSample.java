@@ -39,7 +39,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			}
 		}
 		sensor = new TouchSensor(this, new Vector2(
-				ROBOT_SIDE / 2, ROBOT_SIDE / 2), 0.2 * ROBOT_SIDE / 5);
+				0, 0), 0.001 * ROBOT_SIDE / 5);
 	}
 
 	protected long lastFrameNum = 0;
@@ -69,7 +69,6 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			speedMod *= src.getTrigger(Trigger.RIGHT_TRIGGER) == 1.0f ? triggerMod : 1.0f;
 			rightWheel.x += round(fx, 2) * speed * speedMod;
 			rightWheel.y += round(fy, 2) * speed * speedMod;
-			System.out.println(SensorValue(sensor) + ":" + restrict);
 			if(SensorValue(sensor) == -restrict){
 				ShapeEntity se = shapeEntities[restrict%4][restrict/4];
 				shapes.remove(se);
