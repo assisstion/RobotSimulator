@@ -63,10 +63,10 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 
 	@Override
 	public void wait1Msec(long millis){
-		long currentFrame = frameCounter / 1000000;
+		long currentFrame = getFrameCounter() / 1000000;
 		long target = currentFrame + millis;
 		Object o = getFrameCounterLock(target);
-		while(frameCounter / 1000000 < target){
+		while(getFrameCounter() / 1000000 < target){
 			synchronized(o){
 				try{
 					o.wait();
@@ -100,7 +100,7 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 	protected class RobotStarter implements Runnable{
 		@Override
 		public void run(){
-			waitUntil(() -> paints > getUpdatesPerSecond() /
+			waitUntil(() -> getPaints() > getUpdatesPerSecond() /
 					getUpdatesPerPaint() / 10 + 1);
 			new Thread(RobotProgram.this).start();
 		}

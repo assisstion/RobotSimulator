@@ -14,6 +14,7 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
@@ -57,16 +58,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected static final int motorB = 1;
 	protected static final int motorC = 2;
 
-	protected long paints = 0;
-	protected long updates = 0;
-	//In nanos
-	protected long frameCounter = 0;
-
 	protected Controller controller = null;
 
+	protected boolean autoControllerPolling = true;
+
+	private long paints = 0;
+	private long updates = 0;
+	//In nanos
+	private long frameCounter = 0;
+
 	//protected int speedMultiplier = 100;
-	private int updatesPerSecond = 1000;
-	private int updatesPerPaint = 15;
+	private int updatesPerSecond = 100;
+	private int updatesPerPaint = 2;
 
 	private Object pauseLock = new Object();
 	private boolean paused;
@@ -401,23 +404,33 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				updates++;
 				updateMotion(diff);
 				updateScreen(diff);
+				Set<Object> toBeRemovedLocks = new HashSet<Object>();
 				for(Map.Entry<Comparable<?>, Supplier<Boolean>> condition : waitLocks.entrySet()){
 					if(condition.getValue().get()){
 						Object lock = condition.getKey();
 						synchronized(lock){
 							lock.notifyAll();
 						}
+						toBeRemovedLocks.add(lock);
 					}
+				}
+				for(Object lock : toBeRemovedLocks){
+					waitLocks.remove(lock);
 				}
 			}
 		}
 	}
 
 	protected void updateController(){
+		if(!autoControllerPolling){
+			return;
+		}
 		if(controller == null){
 			return;
 		}
-		controller.poll();
+		if(!controller.poll()){
+			controller = null;
+		}
 	}
 
 	@Override
@@ -533,5 +546,17 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	protected int getUpdatesPerPaint(){
 		return updatesPerPaint;
+	}
+
+	protected long getUpdates(){
+		return updates;
+	}
+
+	protected long getPaints(){
+		return paints;
+	}
+
+	protected long getFrameCounter(){
+		return frameCounter;
 	}
 }
