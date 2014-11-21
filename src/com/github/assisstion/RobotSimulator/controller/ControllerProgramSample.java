@@ -1,5 +1,7 @@
 package com.github.assisstion.RobotSimulator.controller;
 
+import net.java.games.input.Controller;
+
 import com.github.assisstion.RobotSimulator.RobotProgram;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
@@ -20,6 +22,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 
 	@Override
 	public void run(){
+		Controller controller = getController();
 		//Must have controller to test
 		if(controller == null){
 			return;
@@ -35,10 +38,6 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			float fy = src.getJoystickY(Joystick.LEFT_JOYSTICK);
 			rightWheel.x += round(fx, 2) * speed;
 			rightWheel.y += round(fy, 2) * speed;
-
-			/*if(attached.getComponent(Component.Identifier.Button._1).getPollData() == 1.0f){
-				System.out.println("hahaha");
-			}*/
 		}
 	}
 

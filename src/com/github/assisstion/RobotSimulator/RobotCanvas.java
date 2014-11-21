@@ -31,12 +31,9 @@ import net.java.games.input.ControllerEnvironment;
 
 public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
-	private NavigableMap<Long, Object> frameCounterLocks =
-			new TreeMap<Long, Object>();
-
-	private Map<Comparable<?>, BooleanSupplier> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
-			BooleanSupplier>();
-
+	/*
+	 * Protected fields
+	 */
 	//Boolean: does collide
 	protected Map<Shape, Boolean> shapes = new HashMap<Shape, Boolean>();
 
@@ -50,18 +47,27 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected double direction = Math.PI / 2;
 	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
 
-	protected Set<Integer> keysDown = new ConcurrentSkipListSet<Integer>();
-
 	protected double[] motor = new double[3];
 
 	protected static final int motorA = 0;
 	protected static final int motorB = 1;
 	protected static final int motorC = 2;
 
-	protected Controller controller = null;
+	private Controller controller = null;
 
 	protected boolean autoControllerPolling = true;
 	protected boolean drawing = true;
+
+	/*
+	 * Private fields
+	 */
+	private NavigableMap<Long, Object> frameCounterLocks =
+			new TreeMap<Long, Object>();
+
+	private Map<Comparable<?>, BooleanSupplier> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
+			BooleanSupplier>();
+
+	private Set<Integer> keysDown = new ConcurrentSkipListSet<Integer>();
 
 	private long paints = 0;
 	private long updates = 0;
@@ -190,8 +196,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		}
 	}
 
-
-
 	@Override
 	public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)
 			throws PrinterException{
@@ -289,7 +293,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				+ Math.sin(direction) * add.y, orig.y - Math.cos(direction) * add.y
 				- Math.sin(direction) * add.x);
 	}
-
 
 	//Diff in nanos
 	protected void updateMotion(long diff){
@@ -512,7 +515,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		}
 	}
 
-
 	public Object getWaitLock(BooleanSupplier condition){
 		Comparable<?> o = new Comparable<Object>(){
 
@@ -539,7 +541,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		}
 	}
 
-
 	@Override
 	public void keyReleased(KeyEvent e){
 		keysDown.remove(e.getKeyCode());
@@ -548,8 +549,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	public void clearPoints(){
 		points.clear();
 	}
-
-
 
 	public Vector2 getRightWheel(){
 		return rightWheel;
@@ -571,23 +570,31 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		return rect;
 	}
 
-	protected int getUpdatesPerSecond(){
+	public int getUpdatesPerSecond(){
 		return updatesPerSecond;
 	}
 
-	protected int getUpdatesPerPaint(){
+	public int getUpdatesPerPaint(){
 		return updatesPerPaint;
 	}
 
-	protected long getUpdates(){
+	public long getUpdates(){
 		return updates;
 	}
 
-	protected long getPaints(){
+	public long getPaints(){
 		return paints;
 	}
 
-	protected long getFrameCounter(){
+	public long getFrameCounter(){
 		return frameCounter;
+	}
+
+	public boolean isKeyDown(Integer i){
+		return keysDown.contains(i);
+	}
+
+	protected Controller getController(){
+		return controller;
 	}
 }
