@@ -21,7 +21,7 @@ public class TouchSensor implements Sensor{
 		range = d;
 	}
 
-	//1 for colliding, 2 for "on a shape"
+	//positive for colliding, negative for "on a shape"
 	@Override
 	public int sensorValue(){
 		Vector2 sensorVector = RobotCanvas.relativeVector(program.getRightWheel(),

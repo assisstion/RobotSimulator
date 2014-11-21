@@ -3,6 +3,8 @@ package com.github.assisstion.RobotSimulator.controller;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import net.java.games.input.Controller;
@@ -13,6 +15,8 @@ import com.github.assisstion.RobotSimulator.Vector2;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Trigger;
+import com.github.assisstion.RobotSimulator.sensor.CompositeSensor;
+import com.github.assisstion.RobotSimulator.sensor.Sensor;
 import com.github.assisstion.RobotSimulator.sensor.TouchSensor;
 
 public class ControllerProgramSample extends RobotProgram implements StandardControllerListener{
@@ -25,7 +29,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	protected Random random;
 	private static final Color EMPTY = Color.GRAY;
 	private static final Color TARGET = Color.RED;
-	protected TouchSensor sensor;
+	protected Sensor sensor;
 
 	public ControllerProgramSample(){
 		super(ROBOT_SIDE, true);
@@ -33,13 +37,21 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 		for(int i = 0; i < columns; i++){
 			for(int j = 0; j < rows; j++){
 				Shape s = new Rectangle2D.Double(50 * (i+4), 50 * (j+4), 25, 25);
-				ShapeEntity se = new ShapeEntity(s, i + j * columns, EMPTY);
+				ShapeEntity se = new ShapeEntity(s, i + j * columns + 1, EMPTY);
 				shapeEntities[i][j] = se;
 				shapes.put(se, false);
 			}
 		}
-		sensor = new TouchSensor(this, new Vector2(
-				0, 0), 0.001 * ROBOT_SIDE / 5);
+		List<TouchSensor> list = new ArrayList<TouchSensor>();
+		list.add(new TouchSensor(this, new Vector2(
+				ROBOT_SIDE, ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
+		list.add(new TouchSensor(this, new Vector2(
+				ROBOT_SIDE, -ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
+		list.add(new TouchSensor(this, new Vector2(
+				0, ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
+		list.add(new TouchSensor(this, new Vector2(
+				0, -ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
+		sensor = new CompositeSensor<Sensor>(list);
 	}
 
 	protected long lastFrameNum = 0;
@@ -67,12 +79,25 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			float speedMod = 1f;
 			speedMod *= src.getTrigger(Trigger.LEFT_TRIGGER) == 1.0f ? 1.0f / triggerMod : 1.0f;
 			speedMod *= src.getTrigger(Trigger.RIGHT_TRIGGER) == 1.0f ? triggerMod : 1.0f;
-			rightWheel.x += round(fx, 2) * speed * speedMod;
-			rightWheel.y += round(fy, 2) * speed * speedMod;
-			if(SensorValue(sensor) == -restrict){
+			boolean first = true;
+			int counter = 0;
+			do{
+				if(!first){
+					rightWheel.x -= round(fx, 2) * speed * speedMod;
+					rightWheel.y -= round(fy, 2) * speed * speedMod;
+					speedMod /= 2;
+					if(counter++ >= subCollisionIterations){
+						break;
+					}
+				}
+				first = false;
+				rightWheel.x += round(fx, 2) * speed * speedMod;
+				rightWheel.y += round(fy, 2) * speed * speedMod;
+			} while(collision());
+			if(SensorValue(sensor) == restrict + 1){
 				ShapeEntity se = shapeEntities[restrict%4][restrict/4];
 				shapes.remove(se);
-				shapes.put(new ShapeEntity(se.get(), restrict, EMPTY), false);
+				shapes.put(new ShapeEntity(se.get(), restrict + 1, EMPTY), false);
 				restrict = setRandomTarget(restrict);
 			}
 		}
@@ -89,7 +114,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 		} while(n == restrict);
 		ShapeEntity se = shapeEntities[i][j];
 		shapes.remove(se);
-		shapes.put(new ShapeEntity(se.get(), n, TARGET), false);
+		shapes.put(new ShapeEntity(se.get(), n + 1, TARGET), true);
 		return n;
 	}
 

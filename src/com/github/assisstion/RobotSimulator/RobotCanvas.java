@@ -52,10 +52,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected static final int motorB = 1;
 	protected static final int motorC = 2;
 
-	private Controller controller = null;
-
 	protected boolean autoControllerPolling = true;
 	protected boolean drawing = true;
+
+	protected int subCollisionIterations = 16;
 
 	/*
 	 * Private fields
@@ -67,6 +67,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 			BooleanSupplier>();
 
 	private Set<Integer> keysDown = new ConcurrentSkipListSet<Integer>();
+
+	private Controller controller = null;
 
 	private long paints = 0;
 	private long updates = 0;
@@ -98,8 +100,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private double panPixelsPerSecond = 300;
 	private double scaleFactor = 0.95;
 	private double scalePowerFactor = 100;
-
-	private int subCollisionIterations = 16;
 
 	//Effectively final
 	private Vector2 defaultRightWheelStart;
@@ -346,6 +346,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected boolean resolveWheel(double dist){
 		rightWheel.y += -Math.cos(direction) * dist;
 		rightWheel.x += Math.sin(direction) * dist;
+		return !collision();
+	}
+
+	protected boolean collision(){
 		Shape e2dd;
 		if(rect){
 			e2dd = getRobotRect();
@@ -361,10 +365,10 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 			Area ae2dd = new Area(e2dd);
 			ae2dd.intersect(new Area(shape));
 			if(!ae2dd.isEmpty()){
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public Ellipse2D.Double getRobotEllipse(){
