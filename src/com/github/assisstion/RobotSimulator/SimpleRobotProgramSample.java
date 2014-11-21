@@ -10,6 +10,7 @@ public class SimpleRobotProgramSample extends RobotProgram{
 
 	@Override
 	public void run(){
+		//Draws a figure 8
 		float speed = 100f;
 		while(true){
 			motor[motorB] = speed;
@@ -18,7 +19,7 @@ public class SimpleRobotProgramSample extends RobotProgram{
 			motor[motorB] = speed - leftWheel.x * speed / 100;
 			motor[motorC] = speed;
 			wait1Msec((int)(Math.PI * 200000 / speed));
-			clearPoints();
+			resetRobot();
 		}
 	}
 

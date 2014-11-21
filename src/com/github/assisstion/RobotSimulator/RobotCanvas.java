@@ -61,6 +61,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	protected Controller controller = null;
 
 	protected boolean autoControllerPolling = true;
+	protected boolean drawing = true;
 
 	private long paints = 0;
 	private long updates = 0;
@@ -93,6 +94,15 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private double scaleFactor = 0.95;
 	private double scalePowerFactor = 100;
 
+	//Effectively final
+	private Vector2 defaultRightWheelStart;
+	private double defaultWheelDistance;
+	private double defaultDirection;
+	private double defaultInitialLeftSpeed;
+	private double defaultInitialRightSpeed;
+	private double defaultAboveY;
+	private double defaultBelowY;
+
 	/**
 	 *
 	 */
@@ -107,16 +117,27 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double aboveY,
 			double belowY, double direction
 			, double initialLeftSpeed, double initialRightSpeed, boolean rect){
-		this.rect = rect;
-		rightWheel = new Vector2(rightWheelStart);
-		leftWheel = new Vector2(wheelDistance, 0);
-		this.direction = direction;
-		motor[motorB] = initialLeftSpeed;
-		motor[motorC] = initialRightSpeed;
 		enabled = true;
-		this.aboveY = aboveY;
-		this.belowY = belowY;
+		this.rect = rect;
+		defaultRightWheelStart = rightWheelStart;
+		defaultWheelDistance = wheelDistance;
+		defaultDirection = direction;
+		defaultInitialLeftSpeed = initialLeftSpeed;
+		defaultInitialRightSpeed = initialRightSpeed;
+		defaultAboveY = aboveY;
+		defaultBelowY = belowY;
+		resetRobot();
 		controllerSetup();
+	}
+
+	public void resetRobot(){
+		rightWheel = new Vector2(defaultRightWheelStart);
+		leftWheel = new Vector2(defaultWheelDistance, 0);
+		direction = defaultDirection;
+		motor[motorB] = defaultInitialLeftSpeed;
+		motor[motorC] = defaultInitialRightSpeed;
+		aboveY = defaultAboveY;
+		belowY = defaultBelowY;
 	}
 
 	public void controllerSetup(){
@@ -281,9 +302,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 			rightWheel.x -= Math.sin(direction) * speed;
 			direction -= roc / a;
 		}
-		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
-		points.add(Pair.make((int)rightWheel.x, (int)rightWheel.y));
-		points.add(Pair.make((int)sub.x, (int)sub.y));
+		if(drawing){
+			Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
+			points.add(Pair.make((int)rightWheel.x, (int)rightWheel.y));
+			points.add(Pair.make((int)sub.x, (int)sub.y));
+		}
 	}
 
 	protected void updateScreen(long diff){
