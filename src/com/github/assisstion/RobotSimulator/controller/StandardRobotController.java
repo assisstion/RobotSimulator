@@ -9,10 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
-import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
-import com.github.assisstion.RobotSimulator.controller.RobotController.Trigger;
-
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 
@@ -154,7 +150,7 @@ public class StandardRobotController implements RobotController{
 		else{
 			Component.Identifier id = mapping.getIDFromButton(button);
 			if(id == null){
-				throw new IllegalStateException("no controller state");
+				throw new IllegalArgumentException("Button does not exist");
 			}
 			return controller.getComponent(id).getPollData() != 0.0f;
 		}
@@ -164,7 +160,7 @@ public class StandardRobotController implements RobotController{
 	public float getTrigger(Trigger trigger){
 		Component.Identifier id = mapping.getIDFromTrigger(trigger);
 		if(id == null){
-			throw new IllegalStateException("no controller state");
+			throw new IllegalArgumentException("Trigger does not exist");
 		}
 		return controller.getComponent(id).getPollData();
 	}
@@ -173,7 +169,7 @@ public class StandardRobotController implements RobotController{
 	public float getJoystickX(Joystick joystick){
 		Component.Identifier id = mapping.getIDFromJoystickX(joystick);
 		if(id == null){
-			throw new IllegalStateException("no controller state");
+			throw new IllegalArgumentException("Joystick does not exist");
 		}
 		return controller.getComponent(id).getPollData();
 	}
@@ -182,7 +178,7 @@ public class StandardRobotController implements RobotController{
 	public float getJoystickY(Joystick joystick){
 		Component.Identifier id = mapping.getIDFromJoystickY(joystick);
 		if(id == null){
-			throw new IllegalStateException("no controller state");
+			throw new IllegalArgumentException("Joystick does not exist");
 		}
 		return controller.getComponent(id).getPollData();
 	}
