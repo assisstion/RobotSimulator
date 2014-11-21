@@ -1,6 +1,6 @@
 package com.github.assisstion.RobotSimulator;
 
-import java.awt.Shape;
+import java.awt.Color;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
@@ -10,7 +10,7 @@ import com.github.assisstion.RobotSimulator.sensor.TouchSensor;
 public class RobotProgramSample extends RobotProgram{
 
 	protected TouchSensor sensor;
-	protected Shape ball;
+	protected ShapeEntity ball;
 
 	public static final float ROBOT_WIDTH = 20.0f;
 
@@ -19,8 +19,9 @@ public class RobotProgramSample extends RobotProgram{
 
 	public RobotProgramSample(){
 		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true);
-		shapes.put(new Rectangle2D.Double(267, 100, 50, 50), true);
-		ball = new Ellipse2D.Double(400, 150, ROBOT_WIDTH, ROBOT_WIDTH);
+		shapes.put(new ShapeEntity(new Rectangle2D.Double(267, 100, 50, 50)), true);
+		ball = new ShapeEntity(new Ellipse2D.Double(400, 150, ROBOT_WIDTH, ROBOT_WIDTH)
+		, Color.BLACK);
 		shapes.put(ball, false);
 		sensor = new TouchSensor(this, new Vector2(
 				getLeftWheelRelative().x / 2, a), 0.2 * getLeftWheelRelative().x / 5);
@@ -38,7 +39,7 @@ public class RobotProgramSample extends RobotProgram{
 
 		motor[motorB] = 100;
 		motor[motorC] = 100;
-		waitUntil(() -> SensorValue(sensor) == 1);
+		waitUntil(() -> SensorValue(sensor) > 0);
 		wait1Msec(500);
 		motor[motorB] = -100;
 		motor[motorC] = -100;
@@ -48,7 +49,7 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec((int) (getLeftWheelRelative().x * Math.PI * 100 / 4) + 1);
 		motor[motorB] = 100;
 		motor[motorC] = 100;
-		waitUntil(() -> SensorValue(sensor) == 2);
+		waitUntil(() -> SensorValue(sensor) < 0);
 		//wait1Msec(1000);
 		motor[motorA] = 50;
 		motor[motorB] = 0;
@@ -69,6 +70,9 @@ public class RobotProgramSample extends RobotProgram{
 		wait1Msec((int)((Math.sqrt(ROBOT_WIDTH*ROBOT_WIDTH+4*a*a)/2-a)*10) + 1);
 		motor[motorB] = 0;
 		motor[motorC] = 0;
+		ball = new ShapeEntity(new Ellipse2D.Double(300-ROBOT_WIDTH,
+				150-ROBOT_WIDTH, ROBOT_WIDTH, ROBOT_WIDTH), Color.BLACK);
+		shapes.put(ball, false);
 	}
 
 	protected long lastSensorValue = -1;

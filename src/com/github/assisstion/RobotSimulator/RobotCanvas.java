@@ -13,7 +13,6 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -35,7 +34,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 * Protected fields
 	 */
 	//Boolean: does collide
-	protected Map<Shape, Boolean> shapes = new HashMap<Shape, Boolean>();
+	protected Map<ShapeEntity, Boolean> shapes = new TreeMap<ShapeEntity, Boolean>();
 
 	//Position relative to the right wheel
 	//(5.0f, 0)
@@ -263,13 +262,13 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		else{
 			g2d.fill(getRobotEllipse());
 		}
-		g2d.setColor(Color.GRAY);
-		for(Map.Entry<Shape, Boolean> shape : shapes.entrySet()){
+		for(Map.Entry<ShapeEntity, Boolean> shape : shapes.entrySet()){
+			g2d.setColor(shape.getKey().getColor());
 			if(shape.getValue()){
-				g2d.fill(shape.getKey());
+				g2d.fill(shape.getKey().get());
 			}
 			else{
-				g2d.draw(shape.getKey());
+				g2d.draw(shape.getKey().get());
 			}
 		}
 		g2d.setColor(Color.RED);
@@ -347,11 +346,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		else{
 			e2dd = getRobotEllipse();
 		}
-		for(Map.Entry<Shape, Boolean> shapeHolder : shapes.entrySet()){
+		for(Map.Entry<ShapeEntity, Boolean> shapeHolder : shapes.entrySet()){
 			if(!shapeHolder.getValue()){
 				continue;
 			}
-			Shape shape = shapeHolder.getKey();
+			Shape shape = shapeHolder.getKey().get();
 			Area ae2dd = new Area(e2dd);
 			ae2dd.intersect(new Area(shape));
 			if(!ae2dd.isEmpty()){

@@ -1,12 +1,12 @@
 package com.github.assisstion.RobotSimulator.sensor;
 
-import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.Map;
 
 import com.github.assisstion.RobotSimulator.RobotCanvas;
 import com.github.assisstion.RobotSimulator.RobotProgram;
+import com.github.assisstion.RobotSimulator.ShapeEntity;
 import com.github.assisstion.RobotSimulator.Vector2;
 
 public class TouchSensor implements Sensor{
@@ -29,15 +29,15 @@ public class TouchSensor implements Sensor{
 		Ellipse2D.Double ellipse = new Ellipse2D.Double(
 				sensorVector.x - range/2, sensorVector.y - range/2,
 				range, range);
-		for(Map.Entry<Shape, Boolean> shape : program.getShapes().entrySet()){
+		for(Map.Entry<ShapeEntity, Boolean> shape : program.getShapes().entrySet()){
 			Area ellipseArea = new Area(ellipse);
-			ellipseArea.intersect(new Area(shape.getKey()));
+			ellipseArea.intersect(new Area(shape.getKey().get()));
 			if(!ellipseArea.isEmpty()){
 				if(shape.getValue()){
-					return 1;
+					return shape.getKey().getID();
 				}
 				else{
-					return 2;
+					return -shape.getKey().getID();
 				}
 			}
 		}

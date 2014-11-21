@@ -1,6 +1,5 @@
 package com.github.assisstion.RobotSimulator;
 
-import java.awt.Shape;
 import java.util.Map;
 
 import com.github.assisstion.RobotSimulator.sensor.Sensor;
@@ -14,5 +13,5 @@ public interface RobotProgrammingBase{
 		}
 		return sensor.sensorValue();
 	}
-	Map<Shape, Boolean> getShapes();
+	Map<ShapeEntity, Boolean> getShapes();
 }
