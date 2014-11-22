@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.BooleanSupplier;
@@ -34,7 +33,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 * Protected fields
 	 */
 	//Boolean: does collide
-	protected Map<ShapeEntity, Boolean> shapes = new TreeMap<ShapeEntity, Boolean>();
+	protected Map<ShapeEntity, Boolean> shapes = new ConcurrentSkipListMap<ShapeEntity, Boolean>();
 
 	//Position relative to the right wheel
 	//(5.0f, 0)
@@ -61,7 +60,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 * Private fields
 	 */
 	private NavigableMap<Long, Object> frameCounterLocks =
-			new TreeMap<Long, Object>();
+			new ConcurrentSkipListMap<Long, Object>();
 
 	private Map<Comparable<?>, BooleanSupplier> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
 			BooleanSupplier>();
@@ -356,13 +355,18 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		return false;
 	}
 
-	public Ellipse2D.Double getRobotEllipse(){
+	public Vector2 getRobotCenter(){
 		Vector2 sub = relativeVector(rightWheel, leftWheel, direction);
-		double subX = sub.x;
-		double subY = sub.y;
-		double centerX = (rightWheel.x + subX) / 2;
-		double centerY = (rightWheel.y + subY) / 2;
-		return new Ellipse2D.Double(centerX - leftWheel.x / 2, centerY - leftWheel.x / 2,
+		return new Vector2((rightWheel.x + sub.x) / 2, (rightWheel.y + sub.y) / 2);
+	}
+
+	public Vector2 getRobotCenterRelative(){
+		return new Vector2(leftWheel).divide(2);
+	}
+
+	public Ellipse2D.Double getRobotEllipse(){
+		Vector2 center = getRobotCenter();
+		return new Ellipse2D.Double(center.x - leftWheel.x / 2, center.y - leftWheel.x / 2,
 				leftWheel.x, leftWheel.x);
 	}
 

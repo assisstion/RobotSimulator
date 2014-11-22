@@ -27,6 +27,9 @@ public class ShapeEntity implements Supplier<Shape>, Comparable<ShapeEntity>{
 	}
 
 	public ShapeEntity(Shape shape, int id, Color color){
+		if(id <= 0){
+			throw new IllegalArgumentException("Illegal ID number");
+		}
 		this.shape = shape;
 		this.id = id;
 		this.color = color;

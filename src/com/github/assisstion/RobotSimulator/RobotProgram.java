@@ -15,23 +15,23 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 	public static final int height = 640;
 	public static final int DEFAULT_X = 300;
 	public static final int DEFAULT_Y = 300;
-	public static final float DEFAULT_DIRECTION = 0;
+	public static final double DEFAULT_DIRECTION = 0;
 
 	/*public RobotProgram(){
 		super();
 	}*/
 
-	public RobotProgram(float diameter, boolean rect){
+	public RobotProgram(double diameter, boolean rect){
 		this(new Vector2(DEFAULT_X, DEFAULT_Y), diameter, DEFAULT_DIRECTION, rect);
 	}
 
-	public RobotProgram(Vector2 location, float diameter, float direction, boolean rect){
+	public RobotProgram(Vector2 location, double diameter, double direction, boolean rect){
 		this(location, diameter, diameter/2, diameter/2, direction, 0, 0, rect);
 	}
 
-	public RobotProgram(Vector2 rightWheelStart, float wheelDistance, double aboveY,
-			double belowY, float direction
-			, float initialLeftSpeed, float initialRightSpeed, boolean rect){
+	public RobotProgram(Vector2 rightWheelStart, double wheelDistance, double aboveY,
+			double belowY, double direction
+			, double initialLeftSpeed, double initialRightSpeed, boolean rect){
 		super(rightWheelStart, wheelDistance, aboveY, belowY,
 				direction, initialLeftSpeed, initialRightSpeed, rect);
 	}

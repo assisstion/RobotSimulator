@@ -7,13 +7,13 @@ public class SimpleRobotProgramSample extends RobotProgram{
 	private static final long serialVersionUID = -9209441905064152827L;
 
 	public SimpleRobotProgramSample(){
-		super(5.0f, true);
+		super(5.0, true);
 	}
 
 	@Override
 	public void run(){
 		//Draws a figure 8
-		float speed = 100f;
+		double speed = 100.0;
 		while(true){
 			motor[motorB] = speed;
 			motor[motorC] = speed - leftWheel.x * speed / 100;

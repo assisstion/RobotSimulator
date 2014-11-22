@@ -14,7 +14,7 @@ public class RobotProgramSample extends RobotProgram{
 	protected TouchSensor sensor;
 	protected ShapeEntity ball;
 
-	public static final float ROBOT_WIDTH = 20.0f;
+	public static final double ROBOT_WIDTH = 20.0;
 
 	private static int a = 10;
 	private static int b = 10;
@@ -26,7 +26,7 @@ public class RobotProgramSample extends RobotProgram{
 		, Color.BLACK);
 		shapes.put(ball, false);
 		sensor = new TouchSensor(this, new Vector2(
-				getLeftWheelRelative().x / 2, a), 0.001 * getLeftWheelRelative().x / 5);
+				getLeftWheelRelative().x / 2, a), 0.0001 * getLeftWheelRelative().x);
 	}
 
 	private static final long serialVersionUID = 346397218252074433L;

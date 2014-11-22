@@ -25,7 +25,7 @@ import com.github.assisstion.RobotSimulator.sensor.TouchSensor;
 public class ControllerProgramSample extends RobotProgram implements StandardControllerListener{
 
 	private static final long serialVersionUID = 8368673221320981088L;
-	private static final float ROBOT_SIDE = 10.0f;
+	private static final double ROBOT_SIDE = 10.0;
 	protected int columns = 4;
 	protected int rows = 4;
 	protected ShapeEntity[][] shapeEntities = new ShapeEntity[columns][rows];
@@ -34,8 +34,8 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	private static final Color TARGET = Color.RED;
 	protected Sensor sensor;
 	protected long lastFrameNum = 0;
-	protected float speed = 100f / getUpdatesPerSecond();
-	protected float triggerMod = 2.0f;
+	protected double speed = 100.0 / getUpdatesPerSecond();
+	protected double triggerMod = 2.0;
 	protected StandardRobotController src;
 	protected int score = 0;
 	protected int scorePerClear = 10;
@@ -52,14 +52,17 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			}
 		}
 		List<TouchSensor> list = new ArrayList<TouchSensor>();
-		list.add(new TouchSensor(this, new Vector2(
-				ROBOT_SIDE, ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
-		list.add(new TouchSensor(this, new Vector2(
-				ROBOT_SIDE, -ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
-		list.add(new TouchSensor(this, new Vector2(
-				0, ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
-		list.add(new TouchSensor(this, new Vector2(
-				0, -ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
+		Vector2 relativeCenter = getRobotCenterRelative();
+		double halfSide = ROBOT_SIDE/2;
+		double sensorRange = 0.0001 * ROBOT_SIDE;
+		list.add(new TouchSensor(this, relativeCenter.add(
+				new Vector2(halfSide, halfSide)), sensorRange));
+		list.add(new TouchSensor(this, getRobotCenterRelative().add(
+				new Vector2(halfSide, -halfSide)), sensorRange));
+		list.add(new TouchSensor(this, getRobotCenterRelative().add(
+				new Vector2(-halfSide, -halfSide)), sensorRange));
+		list.add(new TouchSensor(this, getRobotCenterRelative().add(
+				new Vector2(-halfSide, halfSide)), sensorRange));
 		sensor = new CompositeSensor<Sensor>(list);
 	}
 
