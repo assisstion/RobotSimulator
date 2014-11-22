@@ -224,8 +224,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	//Function for drawing called by paint and print
 	public void draw(Graphics g){
-		paints++;
 		Graphics2D g2d = (Graphics2D) g;
+		paints++;
+		Color original = g2d.getColor();
 		if(!panned){
 			panX -= 0.5 * getWidth();
 			panY -= 0.5 * getHeight();
@@ -237,8 +238,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		g2d.scale(zoom, zoom);
 		g2d.translate(panX, panY);
 		g2d.setBackground(Color.WHITE);
-		//g2d.setColor(Color.BLACK);
-		//g2d.fillRect(0, 0, 10, 10);
 		for(Pair<Integer, Integer> point : points){
 			g2d.drawRect(point.getValueOne(), point.getValueTwo(),
 					0, 0);
@@ -252,12 +251,6 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		double subY = sub.y;
 		g2d.fillOval((int) subX - 2, (int) subY - 2, 4, 4);
 		g2d.setColor(Color.BLUE);
-		/*
-		double centerX = (rightWheel.x + subX) / 2;
-		double centerY = (rightWheel.y + subY) / 2;
-		g2d.fillOval((int)(centerX - leftWheel.x / 2), (int)(centerY - leftWheel.x / 2),
-				(int) leftWheel.x, (int) leftWheel.x);
-		 */
 		if(rect){
 			g2d.fill(getRobotRect());
 		}
@@ -273,20 +266,12 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 				g2d.draw(shape.getKey().get());
 			}
 		}
-		g2d.setColor(Color.RED);
-		double width = leftWheel.x;
-		g2d.drawString("WIDTH: " + width + "cm (pixels)", 100, 100);
-		g2d.drawLine(100, 125, 100, 135);
-		g2d.drawLine(200, 125, 200, 135);
-		g2d.drawLine(100, 130, 200, 130);
-		g2d.drawString("1m", 135, 140);
-		g2d.setColor(Color.BLACK);
-		if(controller != null){
-			int i = 0;
-			for(Component c : controller.getComponents()){
-				g2d.drawString(c.getName() + ": " + c.getPollData(), 10, 10 + i++ * 20);
-			}
-		}
+		g2d.setColor(original);
+		overlay(g);
+	}
+
+	protected void overlay(Graphics g){
+		//Do nothing
 	}
 
 	public static Vector2 relativeVector(Vector2 orig, Vector2 add, double direction){

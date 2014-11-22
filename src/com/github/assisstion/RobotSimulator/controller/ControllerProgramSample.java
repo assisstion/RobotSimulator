@@ -1,12 +1,15 @@
 package com.github.assisstion.RobotSimulator.controller;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.java.games.input.Component;
 import net.java.games.input.Controller;
 
 import com.github.assisstion.RobotSimulator.RobotProgram;
@@ -30,6 +33,12 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	private static final Color EMPTY = Color.GRAY;
 	private static final Color TARGET = Color.RED;
 	protected Sensor sensor;
+	protected long lastFrameNum = 0;
+	protected float speed = 100f / getUpdatesPerSecond();
+	protected float triggerMod = 2.0f;
+	protected StandardRobotController src;
+	protected int score = 0;
+	protected int scorePerClear = 10;
 
 	public ControllerProgramSample(){
 		super(ROBOT_SIDE, true);
@@ -53,11 +62,6 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 				0, -ROBOT_SIDE/2), 0.001 * ROBOT_SIDE / 5));
 		sensor = new CompositeSensor<Sensor>(list);
 	}
-
-	protected long lastFrameNum = 0;
-	protected float speed = 100f / getUpdatesPerSecond();
-	protected float triggerMod = 2.0f;
-	protected StandardRobotController src;
 
 	@Override
 	public void run(){
@@ -95,6 +99,9 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 				rightWheel.y += round(fy, 2) * speed * speedMod;
 			} while(collision());
 			if(SensorValue(sensor) == restrict + 1){
+				if(++score % scorePerClear == 0){
+					clearPoints();
+				}
 				ShapeEntity se = shapeEntities[restrict%4][restrict/4];
 				shapes.remove(se);
 				shapes.put(new ShapeEntity(se.get(), restrict + 1, EMPTY), false);
@@ -158,5 +165,18 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	public boolean isJoystickEnabled(){
 		//Suppress joystick output
 		return false;
+	}
+
+	@Override
+	public void overlay(Graphics g){
+		Graphics2D g2d = (Graphics2D) g;
+		Controller controller = getController();
+		if(controller != null){
+			int i = 0;
+			for(Component c : controller.getComponents()){
+				g2d.drawString(c.getName() + ": " + c.getPollData(), 10, 20 + i++ * 20);
+			}
+		}
+		g2d.drawString("Score: " + score, width - 100, 20);
 	}
 }

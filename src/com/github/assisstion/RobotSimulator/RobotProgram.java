@@ -1,6 +1,7 @@
 package com.github.assisstion.RobotSimulator;
 
 import java.awt.EventQueue;
+import java.awt.Graphics;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
@@ -104,4 +105,7 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 			new Thread(RobotProgram.this).start();
 		}
 	}
+
+	@Override
+	public abstract void overlay(Graphics g);
 }

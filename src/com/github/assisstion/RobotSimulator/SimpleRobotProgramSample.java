@@ -1,5 +1,7 @@
 package com.github.assisstion.RobotSimulator;
 
+import java.awt.Graphics;
+
 public class SimpleRobotProgramSample extends RobotProgram{
 
 	private static final long serialVersionUID = -9209441905064152827L;
@@ -21,6 +23,12 @@ public class SimpleRobotProgramSample extends RobotProgram{
 			wait1Msec((int)(Math.PI * 200000 / speed));
 			resetRobot();
 		}
+	}
+
+	@Override
+	public void overlay(Graphics g){
+		// TODO Auto-generated method stub
+
 	}
 
 	public static void main(String[] args){

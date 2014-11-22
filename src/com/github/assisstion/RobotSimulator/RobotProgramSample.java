@@ -1,6 +1,8 @@
 package com.github.assisstion.RobotSimulator;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
@@ -89,5 +91,17 @@ public class RobotProgramSample extends RobotProgram{
 
 	public static void main(String[] args){
 		new RobotProgramSample().init();
+	}
+
+	@Override
+	public void overlay(Graphics g){
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setColor(Color.RED);
+		double width = leftWheel.x;
+		g2d.drawString("WIDTH: " + width + "cm (pixels)", 100, 100);
+		g2d.drawLine(100, 125, 100, 135);
+		g2d.drawLine(200, 125, 200, 135);
+		g2d.drawLine(100, 130, 200, 130);
+		g2d.drawString("1m", 135, 140);
 	}
 }
