@@ -21,10 +21,10 @@ public class RobotProgramSample extends RobotProgram{
 
 	public RobotProgramSample(){
 		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true);
-		shapes.put(new ShapeEntity(new Rectangle2D.Double(267, 100, 50, 50)), true);
+		shapes.add(new ShapeEntity(new Rectangle2D.Double(267, 100, 50, 50), true));
 		ball = new ShapeEntity(new Ellipse2D.Double(400, 150, ROBOT_WIDTH, ROBOT_WIDTH)
-		, Color.BLACK);
-		shapes.put(ball, false);
+		, Color.BLACK, false);
+		shapes.add(ball);
 		sensor = new TouchSensor(this, new Vector2(
 				getLeftWheelRelative().x / 2, a), 0.0001 * getLeftWheelRelative().x);
 	}
@@ -73,8 +73,8 @@ public class RobotProgramSample extends RobotProgram{
 		motor[motorB] = 0;
 		motor[motorC] = 0;
 		ball = new ShapeEntity(new Ellipse2D.Double(300-ROBOT_WIDTH,
-				150-ROBOT_WIDTH, ROBOT_WIDTH, ROBOT_WIDTH), Color.BLACK);
-		shapes.put(ball, false);
+				150-ROBOT_WIDTH, ROBOT_WIDTH, ROBOT_WIDTH), Color.BLACK, false);
+		shapes.add(ball);
 	}
 
 	protected long lastSensorValue = -1;

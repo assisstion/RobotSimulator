@@ -33,7 +33,7 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	 * Protected fields
 	 */
 	//Boolean: does collide
-	protected Map<ShapeEntity, Boolean> shapes = new ConcurrentSkipListMap<ShapeEntity, Boolean>();
+	protected Set<ShapeEntity> shapes = new ConcurrentSkipListSet<ShapeEntity>();
 
 	//Position relative to the right wheel
 	//(5.0f, 0)
@@ -256,13 +256,13 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		else{
 			g2d.fill(getRobotEllipse());
 		}
-		for(Map.Entry<ShapeEntity, Boolean> shape : shapes.entrySet()){
-			g2d.setColor(shape.getKey().getColor());
-			if(shape.getValue()){
-				g2d.fill(shape.getKey().get());
+		for(ShapeEntity shape : shapes){
+			g2d.setColor(shape.getColor());
+			if(shape.isColliding()){
+				g2d.fill(shape.get());
 			}
 			else{
-				g2d.draw(shape.getKey().get());
+				g2d.draw(shape.get());
 			}
 		}
 		g2d.setColor(original);
@@ -341,11 +341,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		else{
 			e2dd = getRobotEllipse();
 		}
-		for(Map.Entry<ShapeEntity, Boolean> shapeHolder : shapes.entrySet()){
-			if(!shapeHolder.getValue()){
+		for(ShapeEntity shapeHolder : shapes){
+			if(!shapeHolder.isColliding()){
 				continue;
 			}
-			Shape shape = shapeHolder.getKey().get();
+			Shape shape = shapeHolder.get();
 			Area ae2dd = new Area(e2dd);
 			ae2dd.intersect(new Area(shape));
 			if(!ae2dd.isEmpty()){

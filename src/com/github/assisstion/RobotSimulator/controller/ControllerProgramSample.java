@@ -19,6 +19,7 @@ import com.github.assisstion.RobotSimulator.controller.RobotController.Button;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Joystick;
 import com.github.assisstion.RobotSimulator.controller.RobotController.Trigger;
 import com.github.assisstion.RobotSimulator.sensor.CompositeSensor;
+import com.github.assisstion.RobotSimulator.sensor.RaySensor;
 import com.github.assisstion.RobotSimulator.sensor.Sensor;
 import com.github.assisstion.RobotSimulator.sensor.TouchSensor;
 
@@ -33,12 +34,14 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	private static final Color EMPTY = Color.GRAY;
 	private static final Color TARGET = Color.RED;
 	protected Sensor sensor;
+	protected Sensor sensor2;
 	protected long lastFrameNum = 0;
 	protected double speed = 100.0 / getUpdatesPerSecond();
 	protected double triggerMod = 2.0;
 	protected StandardRobotController src;
 	protected int score = 0;
 	protected int scorePerClear = 10;
+	protected boolean forcefieldEnabled = true;
 
 	public ControllerProgramSample(){
 		super(ROBOT_SIDE, true);
@@ -46,24 +49,30 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 		for(int i = 0; i < columns; i++){
 			for(int j = 0; j < rows; j++){
 				Shape s = new Rectangle2D.Double(50 * (i+4), 50 * (j+4), 25, 25);
-				ShapeEntity se = new ShapeEntity(s, i + j * columns + 1, EMPTY);
+				ShapeEntity se = new ShapeEntity(s, i + j * columns + 1, EMPTY, false);
 				shapeEntities[i][j] = se;
-				shapes.put(se, false);
+				shapes.add(se);
 			}
 		}
 		List<TouchSensor> list = new ArrayList<TouchSensor>();
 		Vector2 relativeCenter = getRobotCenterRelative();
 		double halfSide = ROBOT_SIDE/2;
 		double sensorRange = 0.0001 * ROBOT_SIDE;
-		list.add(new TouchSensor(this, relativeCenter.add(
+		list.add(new TouchSensor(this, new Vector2(relativeCenter).add(
 				new Vector2(halfSide, halfSide)), sensorRange));
-		list.add(new TouchSensor(this, getRobotCenterRelative().add(
+		list.add(new TouchSensor(this, new Vector2(relativeCenter).add(
 				new Vector2(halfSide, -halfSide)), sensorRange));
-		list.add(new TouchSensor(this, getRobotCenterRelative().add(
+		list.add(new TouchSensor(this, new Vector2(relativeCenter).add(
 				new Vector2(-halfSide, -halfSide)), sensorRange));
-		list.add(new TouchSensor(this, getRobotCenterRelative().add(
+		list.add(new TouchSensor(this, new Vector2(relativeCenter).add(
 				new Vector2(-halfSide, halfSide)), sensorRange));
 		sensor = new CompositeSensor<Sensor>(list);
+		List<RaySensor> list2 = new ArrayList<RaySensor>();
+		int spokes = 16;
+		for(int i = 0; i < 16; i++){
+			list2.add(new RaySensor(this, relativeCenter, Math.PI * 2 / spokes * i, 50));
+		}
+		sensor2 = new CompositeSensor<Sensor>(list2);
 	}
 
 	@Override
@@ -84,6 +93,10 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			float fx = src.getJoystickX(Joystick.LEFT_JOYSTICK);
 			float fy = src.getJoystickY(Joystick.LEFT_JOYSTICK);
 			float speedMod = 1f;
+			if(forcefieldEnabled){
+				int value = SensorValue(sensor2);
+				speedMod *= Math.pow(1.0 - value / 256.0, 2);
+			}
 			speedMod *= src.getTrigger(Trigger.LEFT_TRIGGER) == 1.0f ? 1.0f / triggerMod : 1.0f;
 			speedMod *= src.getTrigger(Trigger.RIGHT_TRIGGER) == 1.0f ? triggerMod : 1.0f;
 			boolean first = true;
@@ -107,7 +120,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 				}
 				ShapeEntity se = shapeEntities[restrict%4][restrict/4];
 				shapes.remove(se);
-				shapes.put(new ShapeEntity(se.get(), restrict + 1, EMPTY), false);
+				shapes.add(new ShapeEntity(se.get(), restrict + 1, EMPTY, false));
 				restrict = setRandomTarget(restrict);
 			}
 		}
@@ -124,7 +137,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 		} while(n == restrict);
 		ShapeEntity se = shapeEntities[i][j];
 		shapes.remove(se);
-		shapes.put(new ShapeEntity(se.get(), n + 1, TARGET), true);
+		shapes.add(new ShapeEntity(se.get(), n + 1, TARGET, true));
 		return n;
 	}
 
@@ -146,6 +159,9 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	@Override
 	public void buttonReleased(Button button){
 		System.out.println("Button released: " + button.getName());
+		if(button.equals(Button.A)){
+			forcefieldEnabled = !forcefieldEnabled;
+		}
 	}
 
 	@Override

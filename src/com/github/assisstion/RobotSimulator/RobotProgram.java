@@ -2,7 +2,7 @@ package com.github.assisstion.RobotSimulator;
 
 import java.awt.EventQueue;
 import java.awt.Graphics;
-import java.util.Map;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import javax.swing.JFrame;
@@ -37,7 +37,7 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 	}
 
 	@Override
-	public Map<ShapeEntity, Boolean> getShapes(){
+	public Set<ShapeEntity> getShapes(){
 		return shapes;
 	}
 
