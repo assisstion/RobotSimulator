@@ -13,10 +13,12 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.BooleanSupplier;
@@ -43,7 +45,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	//In radians; 0 is top, pi/2 is right
 	//(double)(Math.PI / 2)
 	protected double direction = Math.PI / 2;
-	protected Set<Pair<Integer, Integer>> points = new ConcurrentSkipListSet<Pair<Integer, Integer>>();
+	protected Set<Pair<Integer, Integer>> points = Collections.newSetFromMap(
+			new ConcurrentHashMap<Pair<Integer, Integer>, Boolean>());
 
 	protected double[] motor = new double[3];
 
@@ -62,10 +65,11 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 	private NavigableMap<Long, Object> frameCounterLocks =
 			new ConcurrentSkipListMap<Long, Object>();
 
-	private Map<Comparable<?>, BooleanSupplier> waitLocks = new ConcurrentSkipListMap<Comparable<?>,
+	private Map<Comparable<?>, BooleanSupplier> waitLocks = new ConcurrentHashMap<Comparable<?>,
 			BooleanSupplier>();
 
-	private Set<Integer> keysDown = new ConcurrentSkipListSet<Integer>();
+	private Set<Integer> keysDown = Collections.newSetFromMap(
+			new ConcurrentHashMap<Integer, Boolean>());
 
 	private Controller controller = null;
 
@@ -122,7 +126,8 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 
 	public RobotCanvas(Vector2 rightWheelStart, double wheelDistance, double aboveY,
 			double belowY, double direction
-			, double initialLeftSpeed, double initialRightSpeed, boolean rect){
+			, double initialLeftSpeed, double initialRightSpeed, boolean rect,
+			boolean enableController){
 		enabled = true;
 		this.rect = rect;
 		defaultRightWheelStart = rightWheelStart;
@@ -133,7 +138,9 @@ public class RobotCanvas extends JPanel implements Printable, KeyListener{
 		defaultAboveY = aboveY;
 		defaultBelowY = belowY;
 		resetRobot();
-		controllerSetup();
+		if(enableController){
+			controllerSetup();
+		}
 	}
 
 	public void resetRobot(){

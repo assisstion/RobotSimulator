@@ -20,7 +20,7 @@ public class RobotProgramSample extends RobotProgram{
 	private static int b = 10;
 
 	public RobotProgramSample(){
-		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true);
+		super(new Vector2(300, 300), ROBOT_WIDTH, a, b, 0, 0, 0, true, false);
 		shapes.add(new ShapeEntity(new Rectangle2D.Double(267, 100, 50, 50), true));
 		ball = new ShapeEntity(new Ellipse2D.Double(400, 150, ROBOT_WIDTH, ROBOT_WIDTH)
 		, Color.BLACK, false);

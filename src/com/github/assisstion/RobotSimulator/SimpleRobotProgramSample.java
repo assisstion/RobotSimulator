@@ -7,7 +7,7 @@ public class SimpleRobotProgramSample extends RobotProgram{
 	private static final long serialVersionUID = -9209441905064152827L;
 
 	public SimpleRobotProgramSample(){
-		super(5.0, true);
+		super(5.0, true, false);
 	}
 
 	@Override

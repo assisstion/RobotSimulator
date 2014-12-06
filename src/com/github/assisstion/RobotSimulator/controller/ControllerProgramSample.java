@@ -44,7 +44,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 	protected boolean forcefieldEnabled = true;
 
 	public ControllerProgramSample(){
-		super(ROBOT_SIDE, true);
+		super(ROBOT_SIDE, true, true);
 		random = new Random();
 		for(int i = 0; i < columns; i++){
 			for(int j = 0; j < rows; j++){

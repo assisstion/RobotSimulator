@@ -21,19 +21,22 @@ public abstract class RobotProgram extends RobotCanvas implements RobotProgrammi
 		super();
 	}*/
 
-	public RobotProgram(double diameter, boolean rect){
-		this(new Vector2(DEFAULT_X, DEFAULT_Y), diameter, DEFAULT_DIRECTION, rect);
+	public RobotProgram(double diameter, boolean rect, boolean enableController){
+		this(new Vector2(DEFAULT_X, DEFAULT_Y), diameter,
+				DEFAULT_DIRECTION, rect, enableController);
 	}
 
-	public RobotProgram(Vector2 location, double diameter, double direction, boolean rect){
-		this(location, diameter, diameter/2, diameter/2, direction, 0, 0, rect);
+	public RobotProgram(Vector2 location, double diameter, double direction,
+			boolean rect, boolean enableController){
+		this(location, diameter, diameter/2, diameter/2,
+				direction, 0, 0, rect, enableController);
 	}
 
 	public RobotProgram(Vector2 rightWheelStart, double wheelDistance, double aboveY,
-			double belowY, double direction
-			, double initialLeftSpeed, double initialRightSpeed, boolean rect){
-		super(rightWheelStart, wheelDistance, aboveY, belowY,
-				direction, initialLeftSpeed, initialRightSpeed, rect);
+			double belowY, double direction, double initialLeftSpeed,
+			double initialRightSpeed, boolean rect, boolean enableController){
+		super(rightWheelStart, wheelDistance, aboveY, belowY, direction,
+				initialLeftSpeed, initialRightSpeed, rect, enableController);
 	}
 
 	@Override
