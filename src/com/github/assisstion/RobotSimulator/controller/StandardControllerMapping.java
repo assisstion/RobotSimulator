@@ -128,7 +128,7 @@ public class StandardControllerMapping implements ControllerMapping{
 		else if(id.equals(Component.Identifier.Button._0)){
 			button = Button.X;
 		}
-		else if(id.equals(Component.Identifier.Button._1)){
+		else if(id.equals(Component.Identifier.Button._3)){
 			button = Button.Y;
 		}
 		return button;
@@ -203,7 +203,7 @@ public class StandardControllerMapping implements ControllerMapping{
 		else if(id.equals(Component.Identifier.Button._0)){
 			type = "button";
 		}
-		else if(id.equals(Component.Identifier.Button._1)){
+		else if(id.equals(Component.Identifier.Button._3)){
 			type = "button";
 		}
 		else if(id.equals(Component.Identifier.Button._6)){

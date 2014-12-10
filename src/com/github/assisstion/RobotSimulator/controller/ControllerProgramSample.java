@@ -90,30 +90,7 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 			waitUntil(() -> getUpdates() > lastFrameNum);
 			src.poll();
 			lastFrameNum = getUpdates();
-			float fx = src.getJoystickX(Joystick.LEFT_JOYSTICK);
-			float fy = src.getJoystickY(Joystick.LEFT_JOYSTICK);
-			float speedMod = 1f;
-			if(forcefieldEnabled){
-				int value = SensorValue(sensor2);
-				speedMod *= Math.pow(1.0 - value / 256.0, 2);
-			}
-			speedMod *= src.getTrigger(Trigger.LEFT_TRIGGER) == 1.0f ? 1.0f / triggerMod : 1.0f;
-			speedMod *= src.getTrigger(Trigger.RIGHT_TRIGGER) == 1.0f ? triggerMod : 1.0f;
-			boolean first = true;
-			int counter = 0;
-			do{
-				if(!first){
-					rightWheel.x -= round(fx, 2) * speed * speedMod;
-					rightWheel.y -= round(fy, 2) * speed * speedMod;
-					speedMod /= 2;
-					if(counter++ >= subCollisionIterations){
-						break;
-					}
-				}
-				first = false;
-				rightWheel.x += round(fx, 2) * speed * speedMod;
-				rightWheel.y += round(fy, 2) * speed * speedMod;
-			} while(collision());
+			updateC();
 			if(SensorValue(sensor) == restrict + 1){
 				if(++score % scorePerClear == 0){
 					clearPoints();
@@ -124,6 +101,52 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 				restrict = setRandomTarget(restrict);
 			}
 		}
+	}
+
+	public void updateC(){
+		updateDuo();
+	}
+
+	public void updateDuo(){
+		int speed = 50;
+		motor[motorB] = src.getJoystickY(Joystick.LEFT_JOYSTICK) * -speed;
+		motor[motorC] = src.getJoystickY(Joystick.RIGHT_JOYSTICK) * -speed;
+	}
+
+	public double sqrtAbs(double d){
+		if(d < 0){
+			return -Math.sqrt(-d);
+		}
+		else{
+			return Math.sqrt(d);
+		}
+	}
+
+	public void updateQuad(){
+		float fx = src.getJoystickX(Joystick.LEFT_JOYSTICK);
+		float fy = src.getJoystickY(Joystick.LEFT_JOYSTICK);
+		float speedMod = 1f;
+		if(forcefieldEnabled){
+			int value = SensorValue(sensor2);
+			speedMod *= Math.pow(1.0 - value / 256.0, 2);
+		}
+		speedMod *= src.getTrigger(Trigger.LEFT_TRIGGER) == 1.0f ? 1.0f / triggerMod : 1.0f;
+		speedMod *= src.getTrigger(Trigger.RIGHT_TRIGGER) == 1.0f ? triggerMod : 1.0f;
+		boolean first = true;
+		int counter = 0;
+		do{
+			if(!first){
+				rightWheel.x -= round(fx, 2) * speed * speedMod;
+				rightWheel.y -= round(fy, 2) * speed * speedMod;
+				speedMod /= 2;
+				if(counter++ >= subCollisionIterations){
+					break;
+				}
+			}
+			first = false;
+			rightWheel.x += round(fx, 2) * speed * speedMod;
+			rightWheel.y += round(fy, 2) * speed * speedMod;
+		} while(collision());
 	}
 
 	public int setRandomTarget(int restrict){
@@ -161,6 +184,9 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 		System.out.println("Button released: " + button.getName());
 		if(button.equals(Button.A)){
 			forcefieldEnabled = !forcefieldEnabled;
+		}
+		else if(button.equals(Button.B)){
+			clearPoints();
 		}
 	}
 
