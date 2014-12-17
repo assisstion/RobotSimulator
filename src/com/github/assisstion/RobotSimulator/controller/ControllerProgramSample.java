@@ -122,6 +122,34 @@ public class ControllerProgramSample extends RobotProgram implements StandardCon
 		}
 	}
 
+	/*
+	public void updateTri(){
+		int speed = 50;
+		int rightMotor = motorC;
+		int leftMotor = motorB;
+		if(src.getJoystickX(Joystick.LEFT_JOYSTICK) > 0){
+			if(src.getJoystickY(Joystick.LEFT_JOYSTICK) > 0){
+				motor[rightMotor] = speed * src.getJoystickY(Joystick.LEFT_JOYSTICK);
+				motor[leftMotor] = speed * src.getJoystickX(Joystick.LEFT_JOYSTICK);
+			}
+			else{
+				motor[leftMotor] = speed * src.getJoystickY(Joystick.LEFT_JOYSTICK);
+				motor[rightMotor] = speed * src.getJoystickX(Joystick.LEFT_JOYSTICK);
+			}
+		}
+		else{
+			if(src.getJoystickY(Joystick.LEFT_JOYSTICK) > 0){
+				motor[rightMotor] = speed * src.getJoystickY(Joystick.LEFT_JOYSTICK);
+				motor[leftMotor] = speed * src.getJoystickX(Joystick.LEFT_JOYSTICK);
+			}
+			else{
+				motor[leftMotor] = speed * src.getJoystickY(Joystick.LEFT_JOYSTICK);
+				motor[rightMotor] = speed * src.getJoystickX(Joystick.LEFT_JOYSTICK);
+			}
+		}
+	}
+	 */
+
 	public void updateQuad(){
 		float fx = src.getJoystickX(Joystick.LEFT_JOYSTICK);
 		float fy = src.getJoystickY(Joystick.LEFT_JOYSTICK);
