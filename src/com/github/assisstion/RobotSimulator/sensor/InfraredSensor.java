@@ -19,27 +19,25 @@ public class InfraredSensor implements Sensor{
 	protected double absoluteDirection;
 	protected Vector2 relativePosition;
 	protected double maxRange;
-	protected int valueRange;
 	protected double precision;
 	protected double testSize;
 
 	public InfraredSensor(RobotProgram program, Vector2 absolutePosition,
 			double absoluteDirection, Vector2 relativePosition,
-			double maxRange, int valueRange,
-			double precision){
+			double maxRange, double precision, double testSize){
 		this.program = program;
 		this.absolutePosition = absolutePosition;
 		this.absoluteDirection = absoluteDirection;
 		this.relativePosition = relativePosition;
 		this.maxRange = maxRange;
-		this.valueRange = valueRange;
 		this.precision = precision;
+		this.testSize = testSize;
 	}
 
 	@Override
 	public int sensorValue(){
 		for(ShapeEntity se : program.getShapes()){
-			if(test(se) < 0){
+			if(test(se) >= 0){
 				return 0;
 			}
 		}
